@@ -13,7 +13,7 @@ let test_is_update_possible_1 _ =
         actual_out_state=Bigraph.Big.one
     }
   in
-  let result = Phase4.is_update_possible ~ui2state_map transition ~ui2par_map
+  let result = Phase4.is_update_with_trans_possible ~ui2state_map transition ~ui2par_map
   and expected_result = true in
   assert_equal
     ~msg:"Result not equal to expected"
@@ -33,7 +33,7 @@ let test_is_update_possible_2 _ =
         actual_out_state=Bigraph.Big.one
     }
   in
-  let result = Phase4.is_update_possible ~ui2state_map transition ~ui2par_map
+  let result = Phase4.is_update_with_trans_possible ~ui2state_map transition ~ui2par_map
   and expected_result = false in
   assert_equal
     ~msg:"Result not equal to expected"
@@ -53,7 +53,7 @@ let test_is_update_possible_3 _ =
         actual_out_state=Bigraph.Big.one
     }
   in
-  let result = Phase4.is_update_possible ~ui2state_map transition ~ui2par_map
+  let result = Phase4.is_update_with_trans_possible ~ui2state_map transition ~ui2par_map
   and expected_result = false in
   assert_equal
     ~msg:"Result not equal to expected"
