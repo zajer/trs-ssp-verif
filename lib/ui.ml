@@ -1,9 +1,9 @@
 module IntMapping =
 struct
     type t = int * int
-    let compare (ui0,_) (ui1,_) =
+    let compare (ui0,v0) (ui1,v1) =
     match Stdlib.compare ui0 ui1 with
-        | 0 -> 0
+        | 0 -> Stdlib.compare v0 v1
         | c -> c
 end
 module IntMappingsSet = Set.Make(IntMapping)
@@ -15,7 +15,7 @@ let transform_codom ~transformed_mapping ~codom_mapping =
     IntMappingsSet.map 
         (
             fun (ui,mapped_val) -> 
-                let corresponding_transformation = IntMappingsSet.find (mapped_val,-1) codom_mapping in
+                let corresponding_transformation = IntMappingsSet.find_first (fun (chk_ui,_) -> chk_ui = mapped_val) codom_mapping in
                 match corresponding_transformation with
                 | _, new_mapped_val -> ui,new_mapped_val
         )
