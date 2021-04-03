@@ -44,4 +44,4 @@ let update ui2state_map trans all_states first_new_ui =
         let ui2state_map_updated_by_residue = Ui.transform_codom ~transformed_mapping:ui2state_map ~codom_mapping:residue_inverted 
         and result_state = {TTS.bigraph=(Hashtbl.find all_states trans.out_state_idx);index=trans.out_state_idx} in
         let result_ui2state_map,new_first_ui_val = _update_mapping_with_new_objs ui2state_map_updated_by_residue trans.residue result_state.bigraph.n first_new_ui in
-        (Hashtbl.find all_states trans.out_state_idx),result_ui2state_map,new_first_ui_val
+        {TTS.bigraph=(Hashtbl.find all_states trans.out_state_idx);index=trans.out_state_idx},result_ui2state_map,new_first_ui_val
