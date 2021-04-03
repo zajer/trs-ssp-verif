@@ -34,9 +34,12 @@ let union ~base ~extension =
     )
     extension
     base
-let are_equal s1 s2 = 
-    let s1els = IntMappingsSet.elements s1
-    and s2els = IntMappingsSet.elements s2 in
-    List.for_all2 (fun es1 es2 -> es1 = es2) s1els s2els
+let are_equal s1 s2 =
+    if IntMappingsSet.cardinal s1 = IntMappingsSet.cardinal s2 then
+        let s1els = IntMappingsSet.elements s1
+        and s2els = IntMappingsSet.elements s2 in
+        List.for_all2 (fun es1 es2 -> es1 = es2) s1els s2els
+    else
+        false
 let mapping_to_string (i1,i2) = "("^(string_of_int i1 )^","^(string_of_int i2)^")"
 let map_to_string map = let res = IntMappingsSet.elements map |> List.map (fun mapping -> mapping_to_string mapping) |> String.concat ";" in "{"^res^"}"
