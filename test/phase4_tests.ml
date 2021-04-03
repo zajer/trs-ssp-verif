@@ -65,7 +65,7 @@ let test_is_update_possible_1 _ =
   and ui2par_map = Ui.make_map_of_list [(777,0);(7,1)] 
   and applied_transition = 
     {
-      Tracking_bigraph.TTS.in_state_idx=(-1);
+      Tracking_bigraph.TTS.in_state_idx=(1);
       out_state_idx=(-1);
       react_label="my react";
       participants=(Bigraph.Iso.of_list [(0,1);(1,2)]);
