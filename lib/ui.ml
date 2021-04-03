@@ -15,10 +15,13 @@ let transform_codom ~transformed_mapping ~codom_mapping =
     IntMappingsSet.map 
         (
             fun (ui,mapped_val) -> 
-                let corresponding_transformation = IntMappingsSet.find_first (fun (chk_ui,_) -> chk_ui = mapped_val) codom_mapping in
+                let corresponding_transformation = IntMappingsSet.find_first_opt (fun (chk_ui,_) -> chk_ui = mapped_val) codom_mapping in
                 match corresponding_transformation with
-                | _, new_mapped_val -> ui,new_mapped_val
+                | Some (_, new_mapped_val) -> ui,new_mapped_val
+                | None -> ui,mapped_val
         )
         transformed_mapping
 let is_subset ~target ~subset =
     IntMappingsSet.subset subset target
+let mapping_to_string (i1,i2) = "("^(string_of_int i1 )^","^(string_of_int i2)^")"
+let map_to_string map = let res = IntMappingsSet.elements map |> List.map (fun mapping -> mapping_to_string mapping) |> String.concat ";" in "{"^res^"}"
