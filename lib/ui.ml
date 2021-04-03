@@ -23,5 +23,16 @@ let transform_codom ~transformed_mapping ~codom_mapping =
         transformed_mapping
 let is_subset ~target ~subset =
     IntMappingsSet.subset subset target
+let union ~base ~extension =
+    IntMappingsSet.fold 
+    (
+        fun (chk_ui,new_mapping) extended_set -> 
+            if not (IntMappingsSet.exists (fun (ui,_) -> ui=chk_ui ) base) then
+                IntMappingsSet.add (chk_ui,new_mapping) extended_set
+            else
+                extended_set
+    )
+    extension
+    base
 let mapping_to_string (i1,i2) = "("^(string_of_int i1 )^","^(string_of_int i2)^")"
 let map_to_string map = let res = IntMappingsSet.elements map |> List.map (fun mapping -> mapping_to_string mapping) |> String.concat ";" in "{"^res^"}"
