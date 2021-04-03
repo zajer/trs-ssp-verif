@@ -65,7 +65,7 @@ let test_is_update_possible_1 _ =
   and ui2par_map = Ui.make_map_of_list [(777,0);(7,1)] 
   and applied_transition = 
     {
-      Tracking_bigraph.TTS.in_state_idx=(1);
+      Tracking_bigraph.TTS.in_state_idx=(-1);
       out_state_idx=(-1);
       react_label="my react";
       participants=(Bigraph.Iso.of_list [(0,1);(1,2)]);
@@ -74,7 +74,7 @@ let test_is_update_possible_1 _ =
     }
   and known_transition_1 = 
     {
-      Tracking_bigraph.TTS.in_state_idx=(1);
+      Tracking_bigraph.TTS.in_state_idx=(-1);
       out_state_idx=(-1);
       react_label="my react";
       participants=(Bigraph.Iso.of_list [(0,1);(1,2)]);
@@ -108,7 +108,7 @@ let test_is_update_possible_1 _ =
       residue=Bigraph.Fun.empty;
       actual_out_state=Bigraph.Big.one
     }
-    in
+  and state = {Tracking_bigraph.TTS.bigraph=Bigraph.Big.one;index=1} in
   let known_transitions = [known_transition_1;known_transition_2;known_transition_3;known_transition_4] in
   let known_trans_dict = 
     Seq.unfold 
@@ -122,7 +122,7 @@ let test_is_update_possible_1 _ =
             Some ((dict_elem_key,dict_elem_val),t)
       ) 
       known_transitions |> Hashtbl.of_seq in
-  let result = Phase4.is_update_possible ~ui2state_map ~ui2par_map applied_transition known_trans_dict
+  let result = Phase4.is_update_possible state ~ui2state_map ~ui2par_map applied_transition known_trans_dict
   and expected_result = true, Some known_transition_4 in
   assert_equal
     ~msg:"Result of is_update_possible is not equal to expected"
@@ -167,7 +167,7 @@ let test_is_update_possible_2 _ =
       residue=Bigraph.Fun.empty;
       actual_out_state=Bigraph.Big.one
     }
-    in
+  and state = {Tracking_bigraph.TTS.bigraph=Bigraph.Big.one;index=1} in
   let known_transitions = [known_transition_1;known_transition_2;known_transition_3] in
   let known_trans_dict = 
     Seq.unfold 
@@ -181,7 +181,7 @@ let test_is_update_possible_2 _ =
             Some ((dict_elem_key,dict_elem_val),t)
       ) 
       known_transitions |> Hashtbl.of_seq in
-  let result = Phase4.is_update_possible ~ui2state_map ~ui2par_map applied_transition known_trans_dict
+  let result = Phase4.is_update_possible state ~ui2state_map ~ui2par_map applied_transition known_trans_dict
   and expected_result = false, None in
   assert_equal
     ~msg:"Result of is_update_possible is not equal to expected"

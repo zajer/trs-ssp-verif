@@ -13,9 +13,15 @@ let rec _find_trans_allowing_for_update ~ui2state_map ~ui2par_map trans_with_sam
             true,Some h
         else
             _find_trans_allowing_for_update ~ui2state_map ~ui2par_map t
-let is_update_possible ~ui2state_map ~ui2par_map trans_to_be_applied all_trans = 
-    let key = trans_to_be_applied.TTS.in_state_idx,trans_to_be_applied.react_label in
+let is_update_possible state ~ui2state_map ~ui2par_map trans_to_be_applied all_trans = 
+    let key = state.TTS.index,trans_to_be_applied.TTS.react_label in
     let known_similar_transitions = Hashtbl.find_all all_trans key in
     _find_trans_allowing_for_update ~ui2state_map ~ui2par_map known_similar_transitions
-
-
+let _is_function_injective f = 
+    let codom = Bigraph.Fun.codom f 
+    and fun_as_list = Bigraph.Fun.to_list f in
+    if Bigraph.IntSet.cardinal codom = List.length fun_as_list then
+        true
+    else
+        false
+        
