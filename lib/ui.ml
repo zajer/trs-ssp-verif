@@ -11,14 +11,14 @@ type t = IntMapping.t
 type map = IntMappingsSet.t
 let make_map_of_list source = 
     IntMappingsSet.of_list source
-let transform_codom ~transformed_mapping ~codom_mapping = 
-    IntMappingsSet.map 
+let transform_codom keep_unmapped ~transformed_mapping ~codom_mapping = 
+    IntMappingsSet.filter_map 
         (
             fun (ui,mapped_val) -> 
                 let corresponding_transformation = IntMappingsSet.find_opt (mapped_val,-1) codom_mapping in
                 match corresponding_transformation with
-                | Some (_, new_mapped_val) -> ui,new_mapped_val
-                | None -> ui,mapped_val
+                | Some (_, new_mapped_val) -> Some (ui,new_mapped_val)
+                | None -> if keep_unmapped then Some (ui,mapped_val) else None
         )
         transformed_mapping
 let is_subset ~target ~subset =
