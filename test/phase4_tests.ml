@@ -187,13 +187,154 @@ let test_is_update_possible_2 _ =
     ~msg:"Result of is_update_possible is not equal to expected"
     expected_result
     result
+let test_update_1 _ = 
+  let output_state = Phase4_tests_data.update_test_1_state |> Bigraph.Big.of_string 
+  and ui_map = [(0,0);(1,1);(2,2)] |> Ui.make_map_of_list
+  and applied_transition = 
+    {
+      Tracking_bigraph.TTS.in_state_idx=(-1);
+      out_state_idx=(777);
+      react_label="my react";
+      participants=Bigraph.Iso.empty;
+      residue=Bigraph.Fun.of_list [(0,2);(1,0);(2,1)];
+      actual_out_state=Bigraph.Big.one
+    }
+  and first_new_ui = 3 in
+  let know_states = [(777,output_state)] |> List.to_seq |> Hashtbl.of_seq in
+  let result_out_state,result_ui_map,result_new_ui = Phase4.update ui_map applied_transition know_states first_new_ui
+  and expected_out_state = {Tracking_bigraph.TTS.bigraph=output_state;index=applied_transition.out_state_idx}
+  and expected_ui_map = [(2,0);(0,1);(1,2)] |> Ui.make_map_of_list
+  and expected_new_ui_val = 3 in
+  assert_equal 
+    ~msg:"Result state is not equal to expected"
+    ~cmp:(fun s1 s2 -> s1.Tracking_bigraph.TTS.index = s2.index && Bigraph.Big.equal s1.bigraph s2.bigraph)
+    expected_out_state
+    result_out_state;
+  assert_equal
+    ~msg:"Result UI map not equal to expected"
+    ~printer:Ui.map_to_string
+    ~cmp:Ui.are_equal
+    expected_ui_map
+    result_ui_map;
+  assert_equal
+    ~msg:"Result first new UI value not equal to expected"
+    ~printer:(fun v -> string_of_int v)
+    expected_new_ui_val
+    result_new_ui
+let test_update_2 _ = 
+  let output_state = Phase4_tests_data.update_test_2_state |> Bigraph.Big.of_string 
+  and ui_map = [(0,0);(1,1);(2,2)] |> Ui.make_map_of_list
+  and applied_transition = 
+    {
+      Tracking_bigraph.TTS.in_state_idx=(-1);
+      out_state_idx=(777);
+      react_label="my react";
+      participants=Bigraph.Iso.empty;
+      residue=Bigraph.Fun.of_list [(1,0);(0,2)];
+      actual_out_state=Bigraph.Big.one
+    }
+  and first_new_ui = 3 in
+  let know_states = [(777,output_state)] |> List.to_seq |> Hashtbl.of_seq in
+  let result_out_state,result_ui_map,result_new_ui = Phase4.update ui_map applied_transition know_states first_new_ui
+  and expected_out_state = {Tracking_bigraph.TTS.bigraph=output_state;index=applied_transition.out_state_idx}
+  and expected_ui_map = [(2,0);(0,1)] |> Ui.make_map_of_list
+  and expected_new_ui_val = 3 in
+  assert_equal 
+    ~msg:"Result state is not equal to expected"
+    ~cmp:(fun s1 s2 -> s1.Tracking_bigraph.TTS.index = s2.index && Bigraph.Big.equal s1.bigraph s2.bigraph)
+    expected_out_state
+    result_out_state;
+  assert_equal
+    ~msg:"Result UI map not equal to expected"
+    ~printer:Ui.map_to_string
+    ~cmp:Ui.are_equal
+    expected_ui_map
+    result_ui_map;
+  assert_equal
+    ~msg:"Result first new UI value not equal to expected"
+    ~printer:(fun v -> string_of_int v)
+    expected_new_ui_val
+    result_new_ui
+let test_update_3 _ = 
+  let output_state = Phase4_tests_data.update_test_3_state |> Bigraph.Big.of_string 
+  and ui_map = [(0,0);(1,1);(2,2)] |> Ui.make_map_of_list
+  and applied_transition = 
+    {
+      Tracking_bigraph.TTS.in_state_idx=(-1);
+      out_state_idx=(777);
+      react_label="my react";
+      participants=Bigraph.Iso.empty;
+      residue=Bigraph.Fun.of_list [(0,2);(1,0);(2,1)];
+      actual_out_state=Bigraph.Big.one
+    }
+  and first_new_ui = 3 in
+  let know_states = [(777,output_state)] |> List.to_seq |> Hashtbl.of_seq in
+  let result_out_state,result_ui_map,result_new_ui = Phase4.update ui_map applied_transition know_states first_new_ui
+  and expected_out_state = {Tracking_bigraph.TTS.bigraph=output_state;index=applied_transition.out_state_idx}
+  and expected_ui_map = [(2,0);(0,1);(1,2);(3,3)] |> Ui.make_map_of_list
+  and expected_new_ui_val = 4 in
+  assert_equal 
+    ~msg:"Result state is not equal to expected"
+    ~cmp:(fun s1 s2 -> s1.Tracking_bigraph.TTS.index = s2.index && Bigraph.Big.equal s1.bigraph s2.bigraph)
+    expected_out_state
+    result_out_state;
+  assert_equal
+    ~msg:"Result UI map not equal to expected"
+    ~printer:Ui.map_to_string
+    ~cmp:Ui.are_equal
+    expected_ui_map
+    result_ui_map;
+  assert_equal
+    ~msg:"Result first new UI value not equal to expected"
+    ~printer:(fun v -> string_of_int v)
+    expected_new_ui_val
+    result_new_ui
+let test_update_4 _ = 
+  let output_state = Phase4_tests_data.update_test_4_state |> Bigraph.Big.of_string 
+  and ui_map = [(0,0);(1,1);(2,2)] |> Ui.make_map_of_list
+  and applied_transition = 
+    {
+      Tracking_bigraph.TTS.in_state_idx=(-1);
+      out_state_idx=(777);
+      react_label="my react";
+      participants=Bigraph.Iso.empty;
+      residue=Bigraph.Fun.of_list [(0,2);(1,0)];
+      actual_out_state=Bigraph.Big.one
+    }
+  and first_new_ui = 3 in
+  let know_states = [(777,output_state)] |> List.to_seq |> Hashtbl.of_seq in
+  let result_out_state,result_ui_map,result_new_ui = Phase4.update ui_map applied_transition know_states first_new_ui
+  and expected_out_state = {Tracking_bigraph.TTS.bigraph=output_state;index=applied_transition.out_state_idx}
+  and expected_ui_map = [(2,0);(0,1);(3,2)] |> Ui.make_map_of_list
+  and expected_new_ui_val = 4 in
+  assert_equal 
+    ~msg:"Result state is not equal to expected"
+    ~cmp:(fun s1 s2 -> s1.Tracking_bigraph.TTS.index = s2.index && Bigraph.Big.equal s1.bigraph s2.bigraph)
+    expected_out_state
+    result_out_state;
+  assert_equal
+    ~msg:"Result UI map not equal to expected"
+    ~printer:Ui.map_to_string
+    ~cmp:Ui.are_equal
+    expected_ui_map
+    result_ui_map;
+  assert_equal
+    ~msg:"Result first new UI value not equal to expected"
+    ~printer:(fun v -> string_of_int v)
+    expected_new_ui_val
+    result_new_ui
+
 let suite =
     "Phase 4" >::: [
-        "Is update with trans possible test 1">:: test_is_update_with_trans_possible_1;
+        (*"Is update with trans possible test 1">:: test_is_update_with_trans_possible_1;
         "Is update with trans possible test 2">:: test_is_update_with_trans_possible_2;
         "Is update with trans possible test 3">:: test_is_update_with_trans_possible_3;
         "Is update possible test 1">:: test_is_update_possible_1;
-        "Is update possible test 2">:: test_is_update_possible_2;
+        "Is update possible test 2">:: test_is_update_possible_2;*)
+        "Update test 1 - no new or deleted objects">:: test_update_1;
+        "Update test 2 - no new objects, one deleted">:: test_update_2;
+        "Update test 3 - new object, no deleted">:: test_update_3;
+        "Update test 4 - new object, one deleted">:: test_update_4;
     ]
 
 let () =
