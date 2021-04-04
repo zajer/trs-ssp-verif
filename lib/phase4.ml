@@ -45,3 +45,15 @@ let update ui2state_map trans all_states first_new_ui =
         and result_state = {TTS.bigraph=(Hashtbl.find all_states trans.out_state_idx);index=trans.out_state_idx} in
         let result_ui2state_map,new_first_ui_val = _update_mapping_with_new_objs ui2state_map_updated_by_residue trans.residue result_state.bigraph.n first_new_ui in
         {TTS.bigraph=(Hashtbl.find all_states trans.out_state_idx);index=trans.out_state_idx},result_ui2state_map,new_first_ui_val
+exception Not_updateable of string
+let perform_phase ~current_state ~current_state_mapping ~previous_state ~previous_state_mapping ~mapping_on_redex trans_on_walk first_new_ui all_states all_trans =
+    let cond1,_ = is_update_possible previous_state ~ui2state_map:previous_state_mapping ~ui2par_map:mapping_on_redex trans_on_walk all_trans in
+    match cond1 with
+    | false -> raise (Not_updateable "Previous state is not updateable")
+    | true -> 
+        let cond2,trans_to_apply_opt = is_update_possible current_state ~ui2state_map:current_state_mapping ~ui2par_map:mapping_on_redex trans_on_walk all_trans in
+        match cond2 with
+        | false -> raise (Not_updateable "Currently constructed state is not updateable")
+        | true -> 
+            let trans_to_apply = Option.get trans_to_apply_opt in
+            update current_state_mapping trans_to_apply all_states first_new_ui
