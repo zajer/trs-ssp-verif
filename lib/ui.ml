@@ -9,6 +9,7 @@ end
 module IntMappingsSet = Set.Make(IntMapping)
 type t = IntMapping.t
 type map = IntMappingsSet.t
+let empty_map = IntMappingsSet.empty
 let make_map_of_list source = 
     IntMappingsSet.of_list source
 let transform_codom keep_unmapped ~transformed_mapping ~codom_mapping = 
@@ -21,8 +22,6 @@ let transform_codom keep_unmapped ~transformed_mapping ~codom_mapping =
                 | None -> if keep_unmapped then Some (ui,mapped_val) else None
         )
         transformed_mapping
-let is_subset ~target ~subset =
-    IntMappingsSet.subset subset target
 let union ~base ~extension =
     IntMappingsSet.fold 
     (
@@ -41,5 +40,11 @@ let are_equal s1 s2 =
         List.for_all2 (fun es1 es2 -> es1 = es2) s1els s2els
     else
         false
+let is_subset ~target ~subset =
+    let intersection = IntMappingsSet.inter target subset in
+        if IntMappingsSet.cardinal intersection = IntMappingsSet.cardinal subset then
+            are_equal intersection subset
+        else
+            false
 let mapping_to_string (i1,i2) = "("^(string_of_int i1 )^","^(string_of_int i2)^")"
 let map_to_string map = let res = IntMappingsSet.elements map |> List.map (fun mapping -> mapping_to_string mapping) |> String.concat ";" in "{"^res^"}"
