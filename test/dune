@@ -1,0 +1,8 @@
+(
+    tests
+    (names
+        ui_tests
+        phase4_tests
+    ) 
+    (libraries ounit2 ssp_verification tracking_bigraph )
+)
