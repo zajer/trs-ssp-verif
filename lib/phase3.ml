@@ -15,8 +15,8 @@ let agents_in_future state current_moment =
     State_space.elements_in_future state current_moment
 type time_info = {participants:int list; react_label:string; transition_idx:int; new_objs: int list; term_objs:int list; start_time:int; end_time:int}
 let extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui2redex ~constructed_moment_of_time ~duration_of_transition ~transition_idx react_label =
-    let new_objs = Ui.IntMappingsSet.inter ui2state_after_transition ui2state_before_transition |> Ui.domain
-    and term_objs = Ui.IntMappingsSet.inter ui2state_before_transition ui2state_after_transition |> Ui.domain in
+    let new_objs = Ui.IntMappingsSet.diff ui2state_after_transition ui2state_before_transition |> Ui.domain
+    and term_objs = Ui.IntMappingsSet.diff ui2state_before_transition ui2state_after_transition |> Ui.domain in
     {
         participants=Ui.domain ui2redex;
         react_label;
