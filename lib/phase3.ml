@@ -43,10 +43,10 @@ let rec _construct_state
     all_trans_by_keys 
     time_flow =
     match usable_ewalk with 
-    | [] -> List.rev unused_ewalk,current_state,ui2current_state,current_sat_config
+    | [] -> List.rev unused_ewalk,current_state,ui2current_state,current_sat_config,time_flow
     | h::t -> 
         if IntSet.cardinal ommited_agents = num_of_agents then 
-            List.rev_append unused_ewalk usable_ewalk,current_state,ui2current_state,current_sat_config
+            List.rev_append unused_ewalk usable_ewalk,current_state,ui2current_state,current_sat_config,time_flow
         else
             let involved_agents,time_needed = h.time_change in
             if IntSet.inter involved_agents ommited_agents |> IntSet.is_empty then
