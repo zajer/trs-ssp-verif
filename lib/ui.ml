@@ -46,5 +46,7 @@ let is_subset ~target ~subset =
             are_equal intersection subset
         else
             false
+let domain map = 
+    IntMappingsSet.elements map |> List.map (fun (d,_)-> d)
 let mapping_to_string (i1,i2) = "("^(string_of_int i1 )^","^(string_of_int i2)^")"
 let map_to_string map = let res = IntMappingsSet.elements map |> List.map (fun mapping -> mapping_to_string mapping) |> String.concat ";" in "{"^res^"}"
