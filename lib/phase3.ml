@@ -91,7 +91,7 @@ let rec _construct_state
                     let trans_to_be_applied = corr_trans all_trans_idx h.trans_fun in
                     let new_constructed_state,new_constructed_state_mapping,_ = 
                         Phase4.perform_phase 
-                            ~current_state:current_state 
+                            ~current_state
                             ~current_state_mapping:ui2current_state 
                             ~previous_state 
                             ~previous_state_mapping:ui2previous_state 
