@@ -291,7 +291,7 @@ let test_perform_phase_5 _ =
             time_change=((Phase3_tests_data.IntSet.singleton 1),1)
         }]
     and expected_result_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_two_agents_middle_state;Tracking_bigraph.TTS.index=1}
-    and expected_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list
+    and expected_state_mapping = [(1,1);(2,0);(3,2);(4,3)] |> Ui.make_map_of_list
     and expected_result_sat = [|(1,1);(2,1)|] in
     assert_equal
         ~msg:"There should be one unused walk element as the result"
@@ -316,22 +316,17 @@ let test_perform_phase_5 _ =
         ~printer:Ssp.Template_state.to_stirng
         expected_result_sat
         result_sat
-let test_failed _ = 
-    assert_equal
-        ~msg:"This is just a template of a test, it needs to be replaced with a proper one."
-        false
-        true
 let suite =
     "Phase 3" >::: [
-        (*"Extracting time info test 1 - no new or deleted objects">:: test_extract_time_info_1;
+        "Extracting time info test 1 - no new or deleted objects">:: test_extract_time_info_1;
         "Extracting time info test 2 - new obj, no deleted objects">:: test_extract_time_info_2;
         "Extracting time info test 3 - no new, deleted objects">:: test_extract_time_info_3;
         "Extracting time info test 4 - new and deleted objects">:: test_extract_time_info_4;
         "Performing phase 3 test 1 - one agent - walk with one element - applicable">:: test_perform_phase_1;
-        "Performing phase 3 test 2 - one agent - walk with one element - not applicable because SAT config already sets the agent in a future moment">:: test_perform_phase_2;*)
-        (*"Performing phase 3 test 3 - two agents - walk with two elements - both are applicable">:: test_perform_phase_3;*)
-        (*"Performing phase 3 test 4 - two agents - walk with two elements - both are applicable - different walk">:: test_perform_phase_4;*)
-        "Performing phase 3 test 4 - two agents - walk with two elements - only one is applicable because SAT config already sets one of the agents in a future moment">:: test_perform_phase_5
+        "Performing phase 3 test 2 - one agent - walk with one element - not applicable because SAT config already sets the agent in a future moment">:: test_perform_phase_2;
+        "Performing phase 3 test 3 - two agents - walk with two elements - both are applicable">:: test_perform_phase_3;
+        "Performing phase 3 test 4 - two agents - walk with two elements - both are applicable - different walk">:: test_perform_phase_4;
+        "Performing phase 3 test 5 - two agents - walk with two elements - only one is applicable because SAT config already sets one of the agents in a future moment">:: test_perform_phase_5;
     ]
 
 let () =
