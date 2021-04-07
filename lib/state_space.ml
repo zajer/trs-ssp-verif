@@ -1,5 +1,5 @@
-type sat = int array
-type trans_fun = {func:sat->sat; transition_idx:int}
+type sat = Ssp.Template_state.t
+type trans_fun = Ssp.Template_state.trans_fun
 type walk = trans_fun list
 module IntSet = Set.Make(Int)
 let init_sat noa = 

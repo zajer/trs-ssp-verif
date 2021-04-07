@@ -7,7 +7,7 @@ type extended_walk = extended_walk_element list
     | h::t -> h,t*)
 type mapped_trans = (int,Tracking_bigraph.TTS.trans_exported) Hashtbl.t
 let corr_trans all_trans trans_fun =
-    let trans_id = trans_fun.State_space.transition_idx in
+    let trans_id = trans_fun.Ssp.Template_state.transition_idx in
     Hashtbl.find all_trans trans_id
 let agents_update sat_config time_change =
     State_space.update_sat sat_config time_change
