@@ -49,7 +49,7 @@ let rec _construct_state
             List.rev_append unused_ewalk usable_ewalk,current_state,ui2current_state,current_sat_config,time_flow
         else
             let involved_agents,time_needed = h.time_change in
-            if IntSet.inter involved_agents ommited_agents |> IntSet.is_empty then
+            if not (IntSet.inter involved_agents ommited_agents |> IntSet.is_empty) then
                 _construct_state 
                     ~previous_state 
                     ~ui2previous_state 
@@ -129,10 +129,10 @@ let perform_phase
         ui2previous_state 
         previous_sat_config 
         ewalk
-        time_moment 
+        constructed_time_moment 
         num_of_agents 
         all_states 
-        all_trans_idx 
+        all_trans_by_idx 
         all_trans_by_keys =
             _construct_state 
                 ~previous_state 
@@ -144,9 +144,9 @@ let perform_phase
                 IntSet.empty
                 ~previous_sat_config 
                 ~current_sat_config:previous_sat_config
-                time_moment 
+                constructed_time_moment 
                 num_of_agents 
                 all_states 
-                all_trans_idx 
+                all_trans_by_idx 
                 all_trans_by_keys 
                 []
