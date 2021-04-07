@@ -71,13 +71,267 @@ let test_extract_time_info_4 _ =
         ~printer:_tinfo2string
         expected_result
         result
-
+let _compare_ewalks ew1 ew2 =
+    if (List.length ew1) = (List.length ew2) then
+        List.for_all2 (fun ew1e ew2e -> 
+            Ui.are_equal ew1e.Phase3.ui2redex ew2e.Phase3.ui2redex
+            
+                
+        ) ew1 ew2
+    else
+        false
+let test_perform_phase_1 _ =
+    let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
+    and previous_state_mapping = [(1,0);(2,1);(3,2)] |> Ui.make_map_of_list 
+    and previous_sat_config = [|(1,0)|]
+    and ewalk = Phase3_tests_data.phase_test_one_agent_ewalk 
+    and time_moment = 1
+    and num_of_agents = 1
+    and all_states = Phase3_tests_data.phase_test_one_agent_all_states
+    and all_trans_by_idx = Phase3_tests_data.phase_test_one_agent_all_trans_by_idx
+    and all_trans_by_keys = Phase3_tests_data.phase_test_one_agent_all_trans_by_keys in
+    let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
+                    previous_state
+                    previous_state_mapping
+                    previous_sat_config
+                    ewalk
+                    time_moment
+                    num_of_agents
+                    all_states
+                    all_trans_by_idx
+                    all_trans_by_keys 
+    and expected_unused_walk = []
+    and expected_result_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_output_state;Tracking_bigraph.TTS.index=1}
+    and expected_state_mapping = [(1,0);(2,1);(3,2)] |> Ui.make_map_of_list
+    and expected_result_sat = [|(1,1)|] in
+    assert_equal
+        ~msg:"There should be no unused walk elements as the result"
+        ~cmp:_compare_ewalks
+        expected_unused_walk
+        unused_ewalk;
+    assert_equal
+        ~msg:"Result state is not equal to expected"
+        ~cmp:(fun s1 s2-> (Bigraph.Big.equal s1.Tracking_bigraph.TTS.bigraph s2.Tracking_bigraph.TTS.bigraph) && s1.index = s2.index )
+        expected_result_state
+        result_state;
+    assert_equal
+        ~msg:"Result state mapping is not equal to expected"
+        ~printer:Ssp_verification.Ui.map_to_string
+        ~cmp:Ui.are_equal
+        expected_state_mapping
+        result_state_mapping;
+    assert_equal
+        ~msg:"Result SAT configuration is not equal to expected"
+        ~printer:Ssp.Template_state.to_stirng
+        expected_result_sat
+        result_sat
+let test_perform_phase_2 _ =
+    let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
+    and previous_state_mapping = [(1,0);(2,1);(3,2)] |> Ui.make_map_of_list 
+    and previous_sat_config = [|(1,1)|]
+    and ewalk = Phase3_tests_data.phase_test_one_agent_ewalk 
+    and time_moment = 1
+    and num_of_agents = 1
+    and all_states = Phase3_tests_data.phase_test_one_agent_all_states
+    and all_trans_by_idx = Phase3_tests_data.phase_test_one_agent_all_trans_by_idx
+    and all_trans_by_keys = Phase3_tests_data.phase_test_one_agent_all_trans_by_keys in
+    let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
+                    previous_state
+                    previous_state_mapping
+                    previous_sat_config
+                    ewalk
+                    time_moment
+                    num_of_agents
+                    all_states
+                    all_trans_by_idx
+                    all_trans_by_keys 
+    and expected_unused_walk = ewalk
+    and expected_result_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;Tracking_bigraph.TTS.index=0}
+    and expected_state_mapping = [(1,0);(2,1);(3,2)] |> Ui.make_map_of_list
+    and expected_result_sat = [|(1,1)|] in
+    assert_equal
+        ~msg:"There should be one unused walk element as the result"
+        ~cmp:_compare_ewalks
+        expected_unused_walk
+        unused_ewalk;
+    assert_equal
+        ~msg:"Result state is not equal to expected"
+        ~cmp:(fun s1 s2-> (Bigraph.Big.equal s1.Tracking_bigraph.TTS.bigraph s2.Tracking_bigraph.TTS.bigraph) && s1.index = s2.index )
+        expected_result_state
+        result_state;
+    assert_equal
+        ~msg:"Result state mapping is not equal to expected"
+        ~printer:Ssp_verification.Ui.map_to_string
+        ~cmp:Ui.are_equal
+        expected_state_mapping
+        result_state_mapping;
+    assert_equal
+        ~msg:"Result SAT configuration is not equal to expected"
+        ~printer:Ssp.Template_state.to_stirng
+        expected_result_sat
+        result_sat
+let test_perform_phase_3 _ =
+    let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
+    and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
+    and previous_sat_config = [|(1,0);(2,0)|]
+    and ewalk = Phase3_tests_data.phase_test_two_agents_ewalk_1 
+    and time_moment = 1
+    and num_of_agents = 2
+    and all_states = Phase3_tests_data.phase_test_two_agents_all_states
+    and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
+    and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
+    let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
+                    previous_state
+                    previous_state_mapping
+                    previous_sat_config
+                    ewalk
+                    time_moment
+                    num_of_agents
+                    all_states
+                    all_trans_by_idx
+                    all_trans_by_keys 
+    and expected_unused_walk = []
+    and expected_result_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_two_agents_output_state;Tracking_bigraph.TTS.index=2}
+    and expected_state_mapping = [(2,0);(1,1);(3,2);(4,3)] |> Ui.make_map_of_list
+    and expected_result_sat = [|(1,1);(2,1)|] in
+    assert_equal
+        ~msg:"There should be no unused walk element as the result"
+        ~cmp:_compare_ewalks
+        ~printer:(fun ew -> "walk of length:"^(string_of_int (List.length ew)))
+        expected_unused_walk
+        unused_ewalk;
+    assert_equal
+        ~msg:"Result state is not equal to expected"
+        ~cmp:(fun s1 s2-> (Bigraph.Big.equal s1.Tracking_bigraph.TTS.bigraph s2.Tracking_bigraph.TTS.bigraph) && s1.index = s2.index )
+        expected_result_state
+        result_state;
+    assert_equal
+        ~msg:"Result UI on state's nodes mapping is not equal to expected"
+        ~printer:Ssp_verification.Ui.map_to_string
+        ~cmp:Ui.are_equal
+        expected_state_mapping
+        result_state_mapping;
+    assert_equal
+        ~msg:"Result SAT configuration is not equal to expected"
+        ~printer:Ssp.Template_state.to_stirng
+        expected_result_sat
+        result_sat
+let test_perform_phase_4 _ =
+    let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
+    and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
+    and previous_sat_config = [|(1,0);(2,0)|]
+    and ewalk = Phase3_tests_data.phase_test_two_agents_ewalk_2 
+    and time_moment = 1
+    and num_of_agents = 2
+    and all_states = Phase3_tests_data.phase_test_two_agents_all_states
+    and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
+    and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
+    let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
+                    previous_state
+                    previous_state_mapping
+                    previous_sat_config
+                    ewalk
+                    time_moment
+                    num_of_agents
+                    all_states
+                    all_trans_by_idx
+                    all_trans_by_keys 
+    and expected_unused_walk = []
+    and expected_result_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_two_agents_output_state;Tracking_bigraph.TTS.index=2}
+    and expected_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list
+    and expected_result_sat = [|(1,1);(2,1)|] in
+    assert_equal
+        ~msg:"There should be no unused walk element as the result"
+        ~cmp:_compare_ewalks
+        ~printer:(fun ew -> "walk of length:"^(string_of_int (List.length ew)))
+        expected_unused_walk
+        unused_ewalk;
+    assert_equal
+        ~msg:"Result state is not equal to expected"
+        ~cmp:(fun s1 s2-> (Bigraph.Big.equal s1.Tracking_bigraph.TTS.bigraph s2.Tracking_bigraph.TTS.bigraph) && s1.index = s2.index )
+        expected_result_state
+        result_state;
+    assert_equal
+        ~msg:"Result UI on state's nodes mapping is not equal to expected"
+        ~printer:Ssp_verification.Ui.map_to_string
+        ~cmp:Ui.are_equal
+        expected_state_mapping
+        result_state_mapping;
+    assert_equal
+        ~msg:"Result SAT configuration is not equal to expected"
+        ~printer:Ssp.Template_state.to_stirng
+        expected_result_sat
+        result_sat
+let test_perform_phase_5 _ =
+    let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
+    and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
+    and previous_sat_config = [|(1,1);(2,0)|]
+    and ewalk = Phase3_tests_data.phase_test_two_agents_ewalk_2 
+    and time_moment = 1
+    and num_of_agents = 2
+    and all_states = Phase3_tests_data.phase_test_two_agents_all_states
+    and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
+    and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
+    let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
+                    previous_state
+                    previous_state_mapping
+                    previous_sat_config
+                    ewalk
+                    time_moment
+                    num_of_agents
+                    all_states
+                    all_trans_by_idx
+                    all_trans_by_keys 
+    and expected_unused_walk = 
+        [{
+            Phase3.trans_fun=Phase3_tests_data.phase_test_two_agents_trans_fun_1;
+            ui2redex=[(1,0);(3,1);(4,2)]|> Ui.make_map_of_list;
+            ui2state=[(1,0);(2,1);(3,2);(4,3)]|>Ui.make_map_of_list;
+            first_new_ui=5;
+            time_change=((Phase3_tests_data.IntSet.singleton 1),1)
+        }]
+    and expected_result_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_two_agents_middle_state;Tracking_bigraph.TTS.index=1}
+    and expected_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list
+    and expected_result_sat = [|(1,1);(2,1)|] in
+    assert_equal
+        ~msg:"There should be one unused walk element as the result"
+        ~cmp:_compare_ewalks
+        ~printer:(fun ew -> "walk of length:"^(string_of_int (List.length ew)))
+        expected_unused_walk
+        unused_ewalk;
+    assert_equal
+        ~msg:"Result state is not equal to expected"
+        ~cmp:(fun s1 s2-> (Bigraph.Big.equal s1.Tracking_bigraph.TTS.bigraph s2.Tracking_bigraph.TTS.bigraph) && s1.index = s2.index )
+        ~printer:(fun s -> "State with idx:"^(string_of_int s.index))
+        expected_result_state
+        result_state;
+    assert_equal
+        ~msg:"Result UI on state's nodes mapping is not equal to expected"
+        ~printer:Ssp_verification.Ui.map_to_string
+        ~cmp:Ui.are_equal
+        expected_state_mapping
+        result_state_mapping;
+    assert_equal
+        ~msg:"Result SAT configuration is not equal to expected"
+        ~printer:Ssp.Template_state.to_stirng
+        expected_result_sat
+        result_sat
+let test_failed _ = 
+    assert_equal
+        ~msg:"This is just a template of a test, it needs to be replaced with a proper one."
+        false
+        true
 let suite =
     "Phase 3" >::: [
-        "Extracting time info test 1 - no new or deleted objects">:: test_extract_time_info_1;
+        (*"Extracting time info test 1 - no new or deleted objects">:: test_extract_time_info_1;
         "Extracting time info test 2 - new obj, no deleted objects">:: test_extract_time_info_2;
         "Extracting time info test 3 - no new, deleted objects">:: test_extract_time_info_3;
-        "Extracting time info test 4 - new and deleted objects">:: test_extract_time_info_4
+        "Extracting time info test 4 - new and deleted objects">:: test_extract_time_info_4;
+        "Performing phase 3 test 1 - one agent - walk with one element - applicable">:: test_perform_phase_1;
+        "Performing phase 3 test 2 - one agent - walk with one element - not applicable because SAT config already sets the agent in a future moment">:: test_perform_phase_2;*)
+        (*"Performing phase 3 test 3 - two agents - walk with two elements - both are applicable">:: test_perform_phase_3;*)
+        (*"Performing phase 3 test 4 - two agents - walk with two elements - both are applicable - different walk">:: test_perform_phase_4;*)
+        "Performing phase 3 test 4 - two agents - walk with two elements - only one is applicable because SAT config already sets one of the agents in a future moment">:: test_perform_phase_5
     ]
 
 let () =
