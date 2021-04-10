@@ -27,6 +27,8 @@ let extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui
         term_objs
     }
 type constructed_state = {state:Tracking_bigraph.TTS.state;ui_map:Ui.map;sat_config:Ssp.Template_state.t}
+let state2semi_state s = {Phase4.state=s.state;ui_map=s.ui_map}
+let semi_state2state s sat = {state=s.Phase4.state;ui_map=s.ui_map;sat_config=sat}
 let rec _construct_state 
     ~state_at_previous_moment
     ~state_currently_constructed
@@ -84,20 +86,19 @@ let rec _construct_state
                         time_flow
                 else
                     let trans_to_be_applied = corr_trans all_trans_idx h.trans_fun in
-                    let new_constructed_state,new_constructed_state_mapping,_ = 
+                    let new_constructed_semi_state,_ = 
                         Phase4.perform_phase 
-                            ~current_state:state_currently_constructed.state
-                            ~current_state_mapping:state_currently_constructed.ui_map
-                            ~previous_state:state_at_previous_moment.state 
-                            ~previous_state_mapping:state_at_previous_moment.ui_map
-                            ~mapping_on_redex:h.ui2redex 
-                            trans_to_be_applied 
+                            ~current_state:(state_currently_constructed |> state2semi_state)
+                            ~previous_state:(state_at_previous_moment |> state2semi_state)
+                            (*~mapping_on_redex:h.ui2redex *)
+                            {Phase4.transition=trans_to_be_applied;ui_map_on_redex=h.ui2redex}
+                            (*trans_to_be_applied *)
                             h.first_new_ui
                             all_states
                             all_trans_by_keys in
                     let tinfo = extract_time_info 
                                     ~ui2state_before_transition:state_currently_constructed.ui_map
-                                    ~ui2state_after_transition:new_constructed_state_mapping 
+                                    ~ui2state_after_transition:new_constructed_semi_state.ui_map
                                     ~ui2redex:h.ui2redex 
                                     ~constructed_moment_of_time:time_moment 
                                     ~duration_of_transition:time_needed
@@ -105,7 +106,7 @@ let rec _construct_state
                                     trans_to_be_applied.react_label in
                     _construct_state 
                         ~state_at_previous_moment
-                        ~state_currently_constructed:{state=new_constructed_state;ui_map=new_constructed_state_mapping;sat_config=current_sat_config_after_transition}
+                        ~state_currently_constructed:(semi_state2state new_constructed_semi_state current_sat_config_after_transition )
                         ~usable_ewalk:t 
                         ~unused_ewalk
                         ommited_agents

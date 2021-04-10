@@ -201,7 +201,7 @@ let test_update_1 _ =
     }
   and first_new_ui = 3 in
   let know_states = [(777,output_state)] |> List.to_seq |> Hashtbl.of_seq in
-  let result_out_state,result_ui_map,result_new_ui = Phase4.update ui_map applied_transition know_states first_new_ui
+  let result_semi_state,result_new_ui = Phase4.update ui_map applied_transition know_states first_new_ui
   and expected_out_state = {Tracking_bigraph.TTS.bigraph=output_state;index=applied_transition.out_state_idx}
   and expected_ui_map = [(2,0);(0,1);(1,2)] |> Ui.make_map_of_list
   and expected_new_ui_val = 3 in
@@ -209,13 +209,13 @@ let test_update_1 _ =
     ~msg:"Result state is not equal to expected"
     ~cmp:(fun s1 s2 -> s1.Tracking_bigraph.TTS.index = s2.index && Bigraph.Big.equal s1.bigraph s2.bigraph)
     expected_out_state
-    result_out_state;
+    result_semi_state.state;
   assert_equal
     ~msg:"Result UI map not equal to expected"
     ~printer:Ui.map_to_string
     ~cmp:Ui.are_equal
     expected_ui_map
-    result_ui_map;
+    result_semi_state.ui_map;
   assert_equal
     ~msg:"Result first new UI value not equal to expected"
     ~printer:(fun v -> string_of_int v)
@@ -235,7 +235,7 @@ let test_update_2 _ =
     }
   and first_new_ui = 3 in
   let know_states = [(777,output_state)] |> List.to_seq |> Hashtbl.of_seq in
-  let result_out_state,result_ui_map,result_new_ui = Phase4.update ui_map applied_transition know_states first_new_ui
+  let result_semi_state,result_new_ui = Phase4.update ui_map applied_transition know_states first_new_ui
   and expected_out_state = {Tracking_bigraph.TTS.bigraph=output_state;index=applied_transition.out_state_idx}
   and expected_ui_map = [(2,0);(0,1)] |> Ui.make_map_of_list
   and expected_new_ui_val = 3 in
@@ -243,13 +243,13 @@ let test_update_2 _ =
     ~msg:"Result state is not equal to expected"
     ~cmp:(fun s1 s2 -> s1.Tracking_bigraph.TTS.index = s2.index && Bigraph.Big.equal s1.bigraph s2.bigraph)
     expected_out_state
-    result_out_state;
+    result_semi_state.state;
   assert_equal
     ~msg:"Result UI map not equal to expected"
     ~printer:Ui.map_to_string
     ~cmp:Ui.are_equal
     expected_ui_map
-    result_ui_map;
+    result_semi_state.ui_map;
   assert_equal
     ~msg:"Result first new UI value not equal to expected"
     ~printer:(fun v -> string_of_int v)
@@ -269,7 +269,7 @@ let test_update_3 _ =
     }
   and first_new_ui = 3 in
   let know_states = [(777,output_state)] |> List.to_seq |> Hashtbl.of_seq in
-  let result_out_state,result_ui_map,result_new_ui = Phase4.update ui_map applied_transition know_states first_new_ui
+  let result_semi_state,result_new_ui = Phase4.update ui_map applied_transition know_states first_new_ui
   and expected_out_state = {Tracking_bigraph.TTS.bigraph=output_state;index=applied_transition.out_state_idx}
   and expected_ui_map = [(2,0);(0,1);(1,2);(3,3)] |> Ui.make_map_of_list
   and expected_new_ui_val = 4 in
@@ -277,13 +277,13 @@ let test_update_3 _ =
     ~msg:"Result state is not equal to expected"
     ~cmp:(fun s1 s2 -> s1.Tracking_bigraph.TTS.index = s2.index && Bigraph.Big.equal s1.bigraph s2.bigraph)
     expected_out_state
-    result_out_state;
+    result_semi_state.state;
   assert_equal
     ~msg:"Result UI map not equal to expected"
     ~printer:Ui.map_to_string
     ~cmp:Ui.are_equal
     expected_ui_map
-    result_ui_map;
+    result_semi_state.ui_map;
   assert_equal
     ~msg:"Result first new UI value not equal to expected"
     ~printer:(fun v -> string_of_int v)
@@ -303,7 +303,7 @@ let test_update_4 _ =
     }
   and first_new_ui = 3 in
   let know_states = [(777,output_state)] |> List.to_seq |> Hashtbl.of_seq in
-  let result_out_state,result_ui_map,result_new_ui = Phase4.update ui_map applied_transition know_states first_new_ui
+  let result_semi_state,result_new_ui = Phase4.update ui_map applied_transition know_states first_new_ui
   and expected_out_state = {Tracking_bigraph.TTS.bigraph=output_state;index=applied_transition.out_state_idx}
   and expected_ui_map = [(2,0);(0,1);(3,2)] |> Ui.make_map_of_list
   and expected_new_ui_val = 4 in
@@ -311,13 +311,13 @@ let test_update_4 _ =
     ~msg:"Result state is not equal to expected"
     ~cmp:(fun s1 s2 -> s1.Tracking_bigraph.TTS.index = s2.index && Bigraph.Big.equal s1.bigraph s2.bigraph)
     expected_out_state
-    result_out_state;
+    result_semi_state.state;
   assert_equal
     ~msg:"Result UI map not equal to expected"
     ~printer:Ui.map_to_string
     ~cmp:Ui.are_equal
     expected_ui_map
-    result_ui_map;
+    result_semi_state.ui_map;
   assert_equal
     ~msg:"Result first new UI value not equal to expected"
     ~printer:(fun v -> string_of_int v)
@@ -340,14 +340,14 @@ let test_perform_phase_1 () =
     }
   and first_new_ui = 2 in
   let known_transitions = [(applied_transition.in_state_idx,applied_transition.react_label),applied_transition] |> List.to_seq |> Hashtbl.of_seq 
-  and known_states = [(-1,Phase4_tests_data.perform_phase_test_invalid_previous_state |> Bigraph.Big.of_string);(1,Phase4_tests_data.perform_phase_test_correct_previous_state |> Bigraph.Big.of_string);(-2,Phase4_tests_data.perform_phase_test_invalid_current_state |> Bigraph.Big.of_string);(2,Phase4_tests_data.perform_phase_test_correct_current_state |> Bigraph.Big.of_string)] |> List.to_seq |> Hashtbl.of_seq in
+  and known_states = [(-1,Phase4_tests_data.perform_phase_test_invalid_previous_state |> Bigraph.Big.of_string);(1,Phase4_tests_data.perform_phase_test_correct_previous_state |> Bigraph.Big.of_string);(-2,Phase4_tests_data.perform_phase_test_invalid_current_state |> Bigraph.Big.of_string);(2,Phase4_tests_data.perform_phase_test_correct_current_state |> Bigraph.Big.of_string)] |> List.to_seq |> Hashtbl.of_seq 
+  and previous_constructed_state = {Phase4.state = previous_state;ui_map=previous_state_mapping}
+  and current_constructed_state = {Phase4.state = current_state;ui_map=current_state_mapping} 
+  and mapped_trans = {Phase4.transition=applied_transition;ui_map_on_redex=mapping_on_redex} in
   Phase4.perform_phase
-    ~previous_state
-    ~previous_state_mapping
-    ~current_state
-    ~current_state_mapping
-    ~mapping_on_redex
-    applied_transition
+    ~previous_state:previous_constructed_state
+    ~current_state:current_constructed_state
+    mapped_trans
     first_new_ui
     known_states
     known_transitions 
@@ -372,14 +372,14 @@ let test_perform_phase_2 () =
     } 
   and first_new_ui = 2 in
   let known_transitions = [(applied_transition.in_state_idx,applied_transition.react_label),applied_transition] |> List.to_seq |> Hashtbl.of_seq 
-  and known_states = [(-1,Phase4_tests_data.perform_phase_test_invalid_previous_state |> Bigraph.Big.of_string);(1,Phase4_tests_data.perform_phase_test_correct_previous_state |> Bigraph.Big.of_string);(-2,Phase4_tests_data.perform_phase_test_invalid_current_state |> Bigraph.Big.of_string);(2,Phase4_tests_data.perform_phase_test_correct_current_state |> Bigraph.Big.of_string)] |> List.to_seq |> Hashtbl.of_seq in
+  and known_states = [(-1,Phase4_tests_data.perform_phase_test_invalid_previous_state |> Bigraph.Big.of_string);(1,Phase4_tests_data.perform_phase_test_correct_previous_state |> Bigraph.Big.of_string);(-2,Phase4_tests_data.perform_phase_test_invalid_current_state |> Bigraph.Big.of_string);(2,Phase4_tests_data.perform_phase_test_correct_current_state |> Bigraph.Big.of_string)] |> List.to_seq |> Hashtbl.of_seq
+  and previous_constructed_state = {Phase4.state = previous_state;ui_map=previous_state_mapping}
+  and current_constructed_state = {Phase4.state = current_state;ui_map=current_state_mapping} 
+  and mapped_trans = {Phase4.transition=applied_transition;ui_map_on_redex=mapping_on_redex} in
   Phase4.perform_phase
-    ~previous_state
-    ~previous_state_mapping
-    ~current_state
-    ~current_state_mapping
-    ~mapping_on_redex
-    applied_transition
+    ~previous_state:previous_constructed_state
+    ~current_state:current_constructed_state
+    mapped_trans
     first_new_ui
     known_states
     known_transitions
@@ -413,14 +413,14 @@ let test_perform_phase_3 () =
     }
   and first_new_ui = 4 in
   let known_transitions = [(applied_transition.in_state_idx,applied_transition.react_label),applied_transition;(transition_for_current_state.in_state_idx,transition_for_current_state.react_label),transition_for_current_state] |> List.to_seq |> Hashtbl.of_seq 
-  and known_states = [(-1,Phase4_tests_data.perform_phase_test_invalid_previous_state |> Bigraph.Big.of_string);(1,Phase4_tests_data.perform_phase_test_correct_previous_state |> Bigraph.Big.of_string);(-2,Phase4_tests_data.perform_phase_test_invalid_current_state |> Bigraph.Big.of_string);(2,Phase4_tests_data.perform_phase_test_correct_current_state |> Bigraph.Big.of_string)] |> List.to_seq |> Hashtbl.of_seq in
+  and known_states = [(-1,Phase4_tests_data.perform_phase_test_invalid_previous_state |> Bigraph.Big.of_string);(1,Phase4_tests_data.perform_phase_test_correct_previous_state |> Bigraph.Big.of_string);(-2,Phase4_tests_data.perform_phase_test_invalid_current_state |> Bigraph.Big.of_string);(2,Phase4_tests_data.perform_phase_test_correct_current_state |> Bigraph.Big.of_string)] |> List.to_seq |> Hashtbl.of_seq 
+  and previous_constructed_state = {Phase4.state = previous_state;ui_map=previous_state_mapping}
+  and current_constructed_state = {Phase4.state = current_state;ui_map=current_state_mapping} 
+  and mapped_trans = {Phase4.transition=applied_transition;ui_map_on_redex=mapping_on_redex} in
   Phase4.perform_phase
-    ~previous_state
-    ~previous_state_mapping
-    ~current_state
-    ~current_state_mapping
-    ~mapping_on_redex
-    applied_transition
+    ~previous_state:previous_constructed_state
+    ~current_state:current_constructed_state
+    mapped_trans
     first_new_ui
     known_states
     known_transitions
@@ -454,14 +454,14 @@ let test_perform_phase_4 () =
   } 
   and first_new_ui = 3 in
   let known_transitions = [(applied_transition.in_state_idx,applied_transition.react_label),applied_transition;(transition_for_current_state.in_state_idx,transition_for_current_state.react_label),transition_for_current_state] |> List.to_seq |> Hashtbl.of_seq 
-  and known_states = [(-1,Phase4_tests_data.perform_phase_test_invalid_previous_state |> Bigraph.Big.of_string);(1,Phase4_tests_data.perform_phase_test_correct_previous_state |> Bigraph.Big.of_string);(-2,Phase4_tests_data.perform_phase_test_invalid_current_state |> Bigraph.Big.of_string);(2,Phase4_tests_data.perform_phase_test_correct_current_state |> Bigraph.Big.of_string)] |> List.to_seq |> Hashtbl.of_seq in
+  and known_states = [(-1,Phase4_tests_data.perform_phase_test_invalid_previous_state |> Bigraph.Big.of_string);(1,Phase4_tests_data.perform_phase_test_correct_previous_state |> Bigraph.Big.of_string);(-2,Phase4_tests_data.perform_phase_test_invalid_current_state |> Bigraph.Big.of_string);(2,Phase4_tests_data.perform_phase_test_correct_current_state |> Bigraph.Big.of_string)] |> List.to_seq |> Hashtbl.of_seq 
+  and previous_constructed_state = {Phase4.state = previous_state;ui_map=previous_state_mapping}
+  and current_constructed_state = {Phase4.state = current_state;ui_map=current_state_mapping} 
+  and mapped_trans = {Phase4.transition=applied_transition;ui_map_on_redex=mapping_on_redex} in
   Phase4.perform_phase
-    ~previous_state
-    ~previous_state_mapping
-    ~current_state
-    ~current_state_mapping
-    ~mapping_on_redex
-    applied_transition
+    ~previous_state:previous_constructed_state
+    ~current_state:current_constructed_state
+    mapped_trans
     first_new_ui
     known_states
     known_transitions
@@ -495,17 +495,18 @@ let test_perform_phase_5 _ =
   } 
   and first_new_ui = 3 in
   let known_transitions = [(applied_transition.in_state_idx,applied_transition.react_label),applied_transition;(transition_for_current_state.in_state_idx,transition_for_current_state.react_label),transition_for_current_state] |> List.to_seq |> Hashtbl.of_seq 
-  and known_states = [(-1,Phase4_tests_data.perform_phase_test_invalid_previous_state |> Bigraph.Big.of_string);(1,Phase4_tests_data.perform_phase_test_correct_previous_state |> Bigraph.Big.of_string);(-2,Phase4_tests_data.perform_phase_test_invalid_current_state |> Bigraph.Big.of_string);(2,Phase4_tests_data.perform_phase_test_correct_current_state |> Bigraph.Big.of_string)] |> List.to_seq |> Hashtbl.of_seq in
-  let result_state,result_mapping,result_first_new_ui = Phase4.perform_phase
-    ~previous_state
-    ~previous_state_mapping
-    ~current_state
-    ~current_state_mapping
-    ~mapping_on_redex
-    applied_transition
-    first_new_ui
-    known_states
-    known_transitions 
+  and known_states = [(-1,Phase4_tests_data.perform_phase_test_invalid_previous_state |> Bigraph.Big.of_string);(1,Phase4_tests_data.perform_phase_test_correct_previous_state |> Bigraph.Big.of_string);(-2,Phase4_tests_data.perform_phase_test_invalid_current_state |> Bigraph.Big.of_string);(2,Phase4_tests_data.perform_phase_test_correct_current_state |> Bigraph.Big.of_string)] |> List.to_seq |> Hashtbl.of_seq 
+  and previous_constructed_state = {Phase4.state = previous_state;ui_map=previous_state_mapping}
+  and current_constructed_state = {Phase4.state = current_state;ui_map=current_state_mapping} 
+  and mapped_trans = {Phase4.transition=applied_transition;ui_map_on_redex=mapping_on_redex} in
+  let result_state,result_first_new_ui = 
+    Phase4.perform_phase
+      ~previous_state:previous_constructed_state
+      ~current_state:current_constructed_state
+      mapped_trans
+      first_new_ui
+      known_states
+      known_transitions 
   and expected_result_state = {Tracking_bigraph.TTS.bigraph=Phase4_tests_data.perform_phase_test_correct_current_state |> Bigraph.Big.of_string; index=2} 
   and expected_result_mapping = [(0,0);(1,1);(2,2)] |> Ui.make_map_of_list
   and expected_first_new_ui = 3 in
@@ -513,13 +514,13 @@ let test_perform_phase_5 _ =
     ~msg:"Result state is not equal to expected"
     ~cmp:(fun s1 s2-> Bigraph.Big.equal s1.Tracking_bigraph.TTS.bigraph s2.bigraph)
     expected_result_state
-    result_state;
+    result_state.state;
   assert_equal
     ~msg:"Result mapping is not equal to expected"
     ~printer:Ui.map_to_string
     ~cmp:Ui.are_equal
     expected_result_mapping
-    result_mapping;
+    result_state.ui_map;
   assert_equal
     ~msg:"Result first new UI not equal to expected"
     ~printer:(fun i -> string_of_int i)
