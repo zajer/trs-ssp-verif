@@ -36,6 +36,7 @@ let _update_mapping_with_new_objs ui_to_update residue output_state new_ui =
     let result = List.mapi (fun i unmapped_node_id -> new_ui+i, unmapped_node_id) nodes_unmapped_by_residue in
     let mapping_of_new_elems = Ui.make_map_of_list result in
     Ui.union ~base:ui_to_update ~extension:mapping_of_new_elems,num_of_unmapped_nodes+new_ui*)
+type constructed_semi_state = {state:Tracking_bigraph.TTS.state;ui_map:Ui.map}
 let update ui2state_map trans all_states first_new_ui = 
     match Common.is_function_injective trans.TTS.residue with
     | false -> raise (Invalid_argument "Residue is not an injective function")
@@ -44,16 +45,27 @@ let update ui2state_map trans all_states first_new_ui =
         let ui2state_map_updated_by_residue = Ui.transform_codom false ~transformed_mapping:ui2state_map ~codom_mapping:residue_inverted 
         and result_state = {TTS.bigraph=(Hashtbl.find all_states trans.out_state_idx);index=trans.out_state_idx} in
         let result_ui2state_map,new_first_ui_val = Common.update_mapping_with_new_objs ui2state_map_updated_by_residue trans.residue result_state.bigraph.n first_new_ui in
-        {TTS.bigraph=(Hashtbl.find all_states trans.out_state_idx);index=trans.out_state_idx},result_ui2state_map,new_first_ui_val
+        {state={TTS.bigraph=(Hashtbl.find all_states trans.out_state_idx);index=trans.out_state_idx};ui_map=result_ui2state_map},new_first_ui_val
 exception Not_updateable of string
-let perform_phase ~current_state ~current_state_mapping ~previous_state ~previous_state_mapping ~mapping_on_redex trans_on_walk first_new_ui all_states all_trans =
-    let cond1,_ = is_update_possible previous_state ~ui2state_map:previous_state_mapping ~ui2par_map:mapping_on_redex trans_on_walk all_trans in
+type transition_with_ui = {transition:Tracking_bigraph.TTS.trans_exported;ui_map_on_redex:Ui.map}
+let perform_phase ~current_state ~previous_state mapped_trans first_new_ui all_states all_trans =
+    let cond1,_ = is_update_possible 
+                    previous_state.state 
+                    ~ui2state_map:previous_state.ui_map 
+                    ~ui2par_map:mapped_trans.ui_map_on_redex 
+                    mapped_trans.transition
+                    all_trans in
     match cond1 with
     | false -> raise (Not_updateable "Previous state is not updateable")
     | true -> 
-        let cond2,trans_to_apply_opt = is_update_possible current_state ~ui2state_map:current_state_mapping ~ui2par_map:mapping_on_redex trans_on_walk all_trans in
+        let cond2,trans_to_apply_opt = is_update_possible 
+                                        current_state.state 
+                                        ~ui2state_map:current_state.ui_map 
+                                        ~ui2par_map:mapped_trans.ui_map_on_redex 
+                                        mapped_trans.transition 
+                                        all_trans in
         match cond2 with
         | false -> raise (Not_updateable "Currently constructed state is not updateable")
         | true -> 
             let trans_to_apply = Option.get trans_to_apply_opt in
-            update current_state_mapping trans_to_apply all_states first_new_ui
+            update current_state.ui_map trans_to_apply all_states first_new_ui

@@ -26,127 +26,116 @@ let extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui
         new_objs;
         term_objs
     }
+type constructed_state = {state:Tracking_bigraph.TTS.state;ui_map:Ui.map;sat_config:Ssp.Template_state.t}
+let state2semi_state s = {Phase4.state=s.state;ui_map=s.ui_map}
+let semi_state2state s sat = {state=s.Phase4.state;ui_map=s.ui_map;sat_config=sat}
 let rec _construct_state 
-    ~previous_state 
+    ~state_at_previous_moment
+    ~state_currently_constructed
+    (*~previous_state 
     ~ui2previous_state 
     ~current_state 
-    ~ui2current_state 
+    ~ui2current_state *)
     ~usable_ewalk 
     ~unused_ewalk 
     ommited_agents 
-    ~previous_sat_config 
-    ~current_sat_config 
-    time_moment 
-    num_of_agents 
+    (*~previous_sat_config 
+    ~current_sat_config *)
+    ~time_moment 
+    ~num_of_agents 
     all_states 
     all_trans_idx 
     all_trans_by_keys 
     time_flow =
     match usable_ewalk with 
-    | [] -> List.rev unused_ewalk,current_state,ui2current_state,current_sat_config,time_flow
+    | [] -> {state=state_currently_constructed.state;ui_map=state_currently_constructed.ui_map;sat_config=state_currently_constructed.sat_config}, List.rev unused_ewalk,time_flow
     | h::t -> 
         if IntSet.cardinal ommited_agents = num_of_agents then 
-            List.rev_append unused_ewalk usable_ewalk,current_state,ui2current_state,current_sat_config,time_flow
+            {state=state_currently_constructed.state;ui_map=state_currently_constructed.ui_map;sat_config=state_currently_constructed.sat_config}, List.rev_append unused_ewalk usable_ewalk,time_flow
         else
             let involved_agents,time_needed = h.time_change in
             if not (IntSet.inter involved_agents ommited_agents |> IntSet.is_empty) then
                 _construct_state 
-                    ~previous_state 
-                    ~ui2previous_state 
-                    ~current_state 
-                    ~ui2current_state 
+                    ~state_at_previous_moment
+                    ~state_currently_constructed
                     ~usable_ewalk:t 
                     ~unused_ewalk:(h::unused_ewalk) 
                     ommited_agents 
-                    ~previous_sat_config 
-                    ~current_sat_config 
-                    time_moment 
-                    num_of_agents
+                    ~time_moment 
+                    ~num_of_agents
                     all_states 
                     all_trans_idx 
                     all_trans_by_keys 
                     time_flow
             else
-                let current_sat_config_after_transition = agents_update current_sat_config h.time_change in
+                let current_sat_config_after_transition = agents_update state_currently_constructed.sat_config h.time_change in
                 let set_of_agents_in_future = agents_in_future current_sat_config_after_transition time_moment in
                 let num_of_agents_in_future = IntSet.cardinal set_of_agents_in_future in
                 if not (num_of_agents_in_future = 0) then
                     _construct_state 
-                        ~previous_state 
-                        ~ui2previous_state 
-                        ~current_state 
-                        ~ui2current_state 
+                        ~state_at_previous_moment
+                        ~state_currently_constructed
                         ~usable_ewalk:t 
                         ~unused_ewalk:(h::unused_ewalk) 
                         (IntSet.union ommited_agents set_of_agents_in_future) 
-                        ~previous_sat_config 
-                        ~current_sat_config 
-                        time_moment 
-                        num_of_agents
+                        ~time_moment 
+                        ~num_of_agents
                         all_states 
                         all_trans_idx 
                         all_trans_by_keys 
                         time_flow
                 else
                     let trans_to_be_applied = corr_trans all_trans_idx h.trans_fun in
-                    let new_constructed_state,new_constructed_state_mapping,_ = 
+                    let new_constructed_semi_state,_ = 
                         Phase4.perform_phase 
-                            ~current_state
-                            ~current_state_mapping:ui2current_state 
-                            ~previous_state 
-                            ~previous_state_mapping:ui2previous_state 
-                            ~mapping_on_redex:h.ui2redex 
-                            trans_to_be_applied 
+                            ~current_state:(state_currently_constructed |> state2semi_state)
+                            ~previous_state:(state_at_previous_moment |> state2semi_state)
+                            (*~mapping_on_redex:h.ui2redex *)
+                            {Phase4.transition=trans_to_be_applied;ui_map_on_redex=h.ui2redex}
+                            (*trans_to_be_applied *)
                             h.first_new_ui
                             all_states
                             all_trans_by_keys in
                     let tinfo = extract_time_info 
-                                    ~ui2state_before_transition:ui2current_state 
-                                    ~ui2state_after_transition:new_constructed_state_mapping 
+                                    ~ui2state_before_transition:state_currently_constructed.ui_map
+                                    ~ui2state_after_transition:new_constructed_semi_state.ui_map
                                     ~ui2redex:h.ui2redex 
                                     ~constructed_moment_of_time:time_moment 
                                     ~duration_of_transition:time_needed
                                     ~transition_idx:h.trans_fun.transition_idx
                                     trans_to_be_applied.react_label in
                     _construct_state 
-                        ~previous_state 
-                        ~ui2previous_state 
-                        ~current_state:new_constructed_state
-                        ~ui2current_state:new_constructed_state_mapping
+                        ~state_at_previous_moment
+                        ~state_currently_constructed:(semi_state2state new_constructed_semi_state current_sat_config_after_transition )
                         ~usable_ewalk:t 
                         ~unused_ewalk
                         ommited_agents
-                        ~previous_sat_config 
-                        ~current_sat_config:current_sat_config_after_transition
-                        time_moment 
-                        num_of_agents
+                        ~time_moment 
+                        ~num_of_agents
                         all_states 
                         all_trans_idx 
                         all_trans_by_keys 
                         (tinfo::time_flow)
 let perform_phase 
-        previous_state 
-        ui2previous_state 
-        previous_sat_config 
+        state_at_previous_moment
         ewalk
-        constructed_time_moment 
-        num_of_agents 
+        ~constructed_time_moment 
+        ~num_of_agents 
         all_states 
         all_trans_by_idx 
         all_trans_by_keys =
-            _construct_state 
-                ~previous_state 
-                ~ui2previous_state 
-                ~current_state:previous_state
-                ~ui2current_state:ui2previous_state
-                ~usable_ewalk:ewalk
-                ~unused_ewalk:[]
-                IntSet.empty
-                ~previous_sat_config 
-                ~current_sat_config:previous_sat_config
-                constructed_time_moment 
-                num_of_agents 
-                all_states 
-                all_trans_by_idx 
-                all_trans_by_keys 
-                []
+            let state,unused_walk,time_infos = 
+                _construct_state 
+                    ~state_at_previous_moment
+                    ~state_currently_constructed:state_at_previous_moment
+                    ~usable_ewalk:ewalk
+                    ~unused_ewalk:[]
+                    IntSet.empty
+                    ~time_moment:constructed_time_moment 
+                    ~num_of_agents 
+                    all_states 
+                    all_trans_by_idx 
+                    all_trans_by_keys 
+                    [] in
+                state,unused_walk,time_infos
+                
