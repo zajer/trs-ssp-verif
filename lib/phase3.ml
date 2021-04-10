@@ -116,19 +116,17 @@ let rec _construct_state
                         all_trans_by_keys 
                         (tinfo::time_flow)
 let perform_phase 
-        previous_state 
-        ui2previous_state 
-        previous_sat_config 
+        state_at_previous_moment
         ewalk
-        constructed_time_moment 
-        num_of_agents 
+        ~constructed_time_moment 
+        ~num_of_agents 
         all_states 
         all_trans_by_idx 
         all_trans_by_keys =
             let state,unused_walk,time_infos = 
                 _construct_state 
-                    ~state_at_previous_moment:{state=previous_state;ui_map=ui2previous_state;sat_config=previous_sat_config}
-                    ~state_currently_constructed:{state=previous_state;ui_map=ui2previous_state;sat_config=previous_sat_config}
+                    ~state_at_previous_moment
+                    ~state_currently_constructed:state_at_previous_moment
                     ~usable_ewalk:ewalk
                     ~unused_ewalk:[]
                     IntSet.empty

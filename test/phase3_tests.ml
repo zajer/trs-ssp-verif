@@ -85,18 +85,17 @@ let test_perform_phase_1 _ =
     and previous_state_mapping = [(1,0);(2,1);(3,2)] |> Ui.make_map_of_list 
     and previous_sat_config = [|(1,0)|]
     and ewalk = Phase3_tests_data.phase_test_one_agent_ewalk 
-    and time_moment = 1
+    and constructed_time_moment = 1
     and num_of_agents = 1
     and all_states = Phase3_tests_data.phase_test_one_agent_all_states
     and all_trans_by_idx = Phase3_tests_data.phase_test_one_agent_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_one_agent_all_trans_by_keys in
+    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
     let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
-                    previous_state
-                    previous_state_mapping
-                    previous_sat_config
+                    state_at_previous_moment
                     ewalk
-                    time_moment
-                    num_of_agents
+                    ~constructed_time_moment
+                    ~num_of_agents
                     all_states
                     all_trans_by_idx
                     all_trans_by_keys 
@@ -130,18 +129,17 @@ let test_perform_phase_2 _ =
     and previous_state_mapping = [(1,0);(2,1);(3,2)] |> Ui.make_map_of_list 
     and previous_sat_config = [|(1,1)|]
     and ewalk = Phase3_tests_data.phase_test_one_agent_ewalk 
-    and time_moment = 1
+    and constructed_time_moment = 1
     and num_of_agents = 1
     and all_states = Phase3_tests_data.phase_test_one_agent_all_states
     and all_trans_by_idx = Phase3_tests_data.phase_test_one_agent_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_one_agent_all_trans_by_keys in
+    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
     let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
-                    previous_state
-                    previous_state_mapping
-                    previous_sat_config
+                    state_at_previous_moment
                     ewalk
-                    time_moment
-                    num_of_agents
+                    ~constructed_time_moment
+                    ~num_of_agents
                     all_states
                     all_trans_by_idx
                     all_trans_by_keys 
@@ -175,18 +173,17 @@ let test_perform_phase_3 _ =
     and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
     and previous_sat_config = [|(1,0);(2,0)|]
     and ewalk = Phase3_tests_data.phase_test_two_agents_ewalk_1 
-    and time_moment = 1
+    and constructed_time_moment = 1
     and num_of_agents = 2
     and all_states = Phase3_tests_data.phase_test_two_agents_all_states
     and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
+    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
     let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
-                    previous_state
-                    previous_state_mapping
-                    previous_sat_config
+                    state_at_previous_moment
                     ewalk
-                    time_moment
-                    num_of_agents
+                    ~constructed_time_moment
+                    ~num_of_agents
                     all_states
                     all_trans_by_idx
                     all_trans_by_keys 
@@ -221,18 +218,17 @@ let test_perform_phase_4 _ =
     and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
     and previous_sat_config = [|(1,0);(2,0)|]
     and ewalk = Phase3_tests_data.phase_test_two_agents_ewalk_2 
-    and time_moment = 1
+    and constructed_time_moment = 1
     and num_of_agents = 2
     and all_states = Phase3_tests_data.phase_test_two_agents_all_states
     and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
+    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
     let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
-                    previous_state
-                    previous_state_mapping
-                    previous_sat_config
+                    state_at_previous_moment
                     ewalk
-                    time_moment
-                    num_of_agents
+                    ~constructed_time_moment
+                    ~num_of_agents
                     all_states
                     all_trans_by_idx
                     all_trans_by_keys 
@@ -267,18 +263,17 @@ let test_perform_phase_5 _ =
     and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
     and previous_sat_config = [|(1,1);(2,0)|]
     and ewalk = Phase3_tests_data.phase_test_two_agents_ewalk_2 
-    and time_moment = 1
+    and constructed_time_moment = 1
     and num_of_agents = 2
     and all_states = Phase3_tests_data.phase_test_two_agents_all_states
     and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
+    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
     let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
-                    previous_state
-                    previous_state_mapping
-                    previous_sat_config
+                    state_at_previous_moment
                     ewalk
-                    time_moment
-                    num_of_agents
+                    ~constructed_time_moment
+                    ~num_of_agents
                     all_states
                     all_trans_by_idx
                     all_trans_by_keys 
