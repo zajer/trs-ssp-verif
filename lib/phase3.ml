@@ -136,5 +136,5 @@ let perform_phase
                     all_trans_by_idx 
                     all_trans_by_keys 
                     [] in
-                unused_walk,state.state,state.ui_map,state.sat_config,time_infos
+                state,unused_walk,time_infos
                 

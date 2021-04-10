@@ -91,7 +91,7 @@ let test_perform_phase_1 _ =
     and all_trans_by_idx = Phase3_tests_data.phase_test_one_agent_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_one_agent_all_trans_by_keys in
     let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
-    let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
+    let result_state,unused_ewalk,_ = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
                     ~constructed_time_moment
@@ -112,18 +112,18 @@ let test_perform_phase_1 _ =
         ~msg:"Result state is not equal to expected"
         ~cmp:(fun s1 s2-> (Bigraph.Big.equal s1.Tracking_bigraph.TTS.bigraph s2.Tracking_bigraph.TTS.bigraph) && s1.index = s2.index )
         expected_result_state
-        result_state;
+        result_state.state;
     assert_equal
         ~msg:"Result state mapping is not equal to expected"
         ~printer:Ssp_verification.Ui.map_to_string
         ~cmp:Ui.are_equal
         expected_state_mapping
-        result_state_mapping;
+        result_state.ui_map;
     assert_equal
         ~msg:"Result SAT configuration is not equal to expected"
         ~printer:Ssp.Template_state.to_stirng
         expected_result_sat
-        result_sat
+        result_state.sat_config
 let test_perform_phase_2 _ =
     let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2)] |> Ui.make_map_of_list 
@@ -135,7 +135,7 @@ let test_perform_phase_2 _ =
     and all_trans_by_idx = Phase3_tests_data.phase_test_one_agent_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_one_agent_all_trans_by_keys in
     let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
-    let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
+    let result_state,unused_ewalk,_ = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
                     ~constructed_time_moment
@@ -156,18 +156,18 @@ let test_perform_phase_2 _ =
         ~msg:"Result state is not equal to expected"
         ~cmp:(fun s1 s2-> (Bigraph.Big.equal s1.Tracking_bigraph.TTS.bigraph s2.Tracking_bigraph.TTS.bigraph) && s1.index = s2.index )
         expected_result_state
-        result_state;
+        result_state.state;
     assert_equal
         ~msg:"Result state mapping is not equal to expected"
         ~printer:Ssp_verification.Ui.map_to_string
         ~cmp:Ui.are_equal
         expected_state_mapping
-        result_state_mapping;
+        result_state.ui_map;
     assert_equal
         ~msg:"Result SAT configuration is not equal to expected"
         ~printer:Ssp.Template_state.to_stirng
         expected_result_sat
-        result_sat
+        result_state.sat_config
 let test_perform_phase_3 _ =
     let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
@@ -179,7 +179,7 @@ let test_perform_phase_3 _ =
     and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
     let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
-    let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
+    let result_state,unused_ewalk,_ = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
                     ~constructed_time_moment
@@ -201,18 +201,18 @@ let test_perform_phase_3 _ =
         ~msg:"Result state is not equal to expected"
         ~cmp:(fun s1 s2-> (Bigraph.Big.equal s1.Tracking_bigraph.TTS.bigraph s2.Tracking_bigraph.TTS.bigraph) && s1.index = s2.index )
         expected_result_state
-        result_state;
+        result_state.state;
     assert_equal
         ~msg:"Result UI on state's nodes mapping is not equal to expected"
         ~printer:Ssp_verification.Ui.map_to_string
         ~cmp:Ui.are_equal
         expected_state_mapping
-        result_state_mapping;
+        result_state.ui_map;
     assert_equal
         ~msg:"Result SAT configuration is not equal to expected"
         ~printer:Ssp.Template_state.to_stirng
         expected_result_sat
-        result_sat
+        result_state.sat_config
 let test_perform_phase_4 _ =
     let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
@@ -224,7 +224,7 @@ let test_perform_phase_4 _ =
     and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
     let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
-    let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
+    let result_state,unused_ewalk,_ = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
                     ~constructed_time_moment
@@ -246,18 +246,18 @@ let test_perform_phase_4 _ =
         ~msg:"Result state is not equal to expected"
         ~cmp:(fun s1 s2-> (Bigraph.Big.equal s1.Tracking_bigraph.TTS.bigraph s2.Tracking_bigraph.TTS.bigraph) && s1.index = s2.index )
         expected_result_state
-        result_state;
+        result_state.state;
     assert_equal
         ~msg:"Result UI on state's nodes mapping is not equal to expected"
         ~printer:Ssp_verification.Ui.map_to_string
         ~cmp:Ui.are_equal
         expected_state_mapping
-        result_state_mapping;
+        result_state.ui_map;
     assert_equal
         ~msg:"Result SAT configuration is not equal to expected"
         ~printer:Ssp.Template_state.to_stirng
         expected_result_sat
-        result_sat
+        result_state.sat_config
 let test_perform_phase_5 _ =
     let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
@@ -269,7 +269,7 @@ let test_perform_phase_5 _ =
     and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
     let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
-    let unused_ewalk,result_state,result_state_mapping,result_sat,_ = Phase3.perform_phase
+    let result_state,unused_ewalk,_ = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
                     ~constructed_time_moment
@@ -299,18 +299,18 @@ let test_perform_phase_5 _ =
         ~cmp:(fun s1 s2-> (Bigraph.Big.equal s1.Tracking_bigraph.TTS.bigraph s2.Tracking_bigraph.TTS.bigraph) && s1.index = s2.index )
         ~printer:(fun s -> "State with idx:"^(string_of_int s.index))
         expected_result_state
-        result_state;
+        result_state.state;
     assert_equal
         ~msg:"Result UI on state's nodes mapping is not equal to expected"
         ~printer:Ssp_verification.Ui.map_to_string
         ~cmp:Ui.are_equal
         expected_state_mapping
-        result_state_mapping;
+        result_state.ui_map;
     assert_equal
         ~msg:"Result SAT configuration is not equal to expected"
         ~printer:Ssp.Template_state.to_stirng
         expected_result_sat
-        result_sat
+        result_state.sat_config
 let suite =
     "Phase 3" >::: [
         "Extracting time info test 1 - no new or deleted objects">:: test_extract_time_info_1;
