@@ -14,15 +14,16 @@ let transform_ui_map trans ui2state_map first_new_ui all_states =
         let result_ui2state_map,new_first_ui_val = Common.update_mapping_with_new_objs ui2state_map_updated_by_residue trans.residue result_state.Bigraph.Big.n first_new_ui
         and result_ui2redex_map = gen_ui2redex_map trans.participants ui2state_map in
         result_ui2redex_map,result_ui2state_map,new_first_ui_val
-let extract_time_change trans_fun_raw =
+let extract_time_change current_state trans_fun_raw = 
     let result_set, result_time_shift_opt = List.fold_left 
         (
-            fun (res_is,res_ts_opt) (aid,ts) -> 
+            fun (res_is,res_ts_opt) (relative_aid,ts) -> 
                 if ts <> 0 then
                     let ts_to_add = 
                         match res_ts_opt with
                         | None -> ts
-                        | Some res_ts -> if res_ts = ts then res_ts else raise (Invalid_argument "Time shift for all agents must be the same") in
+                        | Some res_ts -> if res_ts = ts then res_ts else raise (Invalid_argument "Time shift for all agents must be the same")
+                    and aid,_ = Array.get current_state (relative_aid-1)  in
                     Common.IntSet.add aid res_is,Some ts_to_add
                 else
                     res_is,res_ts_opt
@@ -32,20 +33,22 @@ let extract_time_change trans_fun_raw =
         match result_time_shift_opt with
         | None -> raise (Invalid_argument "Transition function must change agents' time")
         | Some result_time_shift -> result_set,result_time_shift
-let rec _transform_raw_walk raw_walk result_extended_walk all_states_by_idx all_trans_by_idx current_ui_map first_new_ui =
+let rec _transform_raw_walk raw_walk result_extended_walk all_states_by_idx all_trans_by_idx current_ui_map current_state first_new_ui =
     match raw_walk with
-    | [] -> result_extended_walk
+    | [] -> result_extended_walk |> List.rev
     | h::t ->
         let parsed_trans = Ssp.Template_state.parse_trans_fun h
-        and time_change = extract_time_change h in
+        and time_change = extract_time_change current_state h in
         let ui2redex,new_current_ui_map,new_first_new_ui = transform_ui_map (Hashtbl.find all_trans_by_idx parsed_trans.transition_idx) current_ui_map first_new_ui all_states_by_idx in
         let new_extended_walk_elem = {Phase3.trans_fun=parsed_trans;ui2redex;ui2state=new_current_ui_map;first_new_ui=new_first_new_ui;time_change} in
-            _transform_raw_walk t (new_extended_walk_elem::result_extended_walk) all_states_by_idx all_trans_by_idx new_current_ui_map new_first_new_ui
-let transform_raw_walk raw_walk all_states all_trans =
+            _transform_raw_walk t (new_extended_walk_elem::result_extended_walk) all_states_by_idx all_trans_by_idx new_current_ui_map (parsed_trans.func current_state) new_first_new_ui
+let perform_phase raw_walk initial_ui_map num_of_agents first_new_ui all_states all_trans =
+    let initial_state = Array.init num_of_agents (fun i -> i+1,0) in
     _transform_raw_walk
         raw_walk
         []
         all_states
         all_trans
-        (Ui.make_map_of_list [])
-        1
+        initial_ui_map
+        initial_state
+        first_new_ui
