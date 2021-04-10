@@ -201,7 +201,7 @@ let test_perform_phase _ =
     let trans_fun_raw_1 = {Ssp.State.permutation_with_time_shift=[(2,1);(1,0)]; react_label="r1"; from_idx=0; to_idx=1; transition_idx=1} 
     and trans_fun_raw_2 = {Ssp.State.permutation_with_time_shift=[(1,0);(2,1)]; react_label="r1"; from_idx=1; to_idx=2; transition_idx=2} 
     and state_1_big = "{(0, A:0),(1, A:0),(2, AT1:0),(3, AT2:0)}\n0 4 0\n0000\n0000\n1000\n0100" |> Bigraph.Big.of_string
-    and state_2_big = "{(0, A:0),(1, A:0),(2, AT1:0),(3, AT2:0)}\n0 4 0\n0000\n0000\n0000\n1100" |> Bigraph.Big.of_string in
+    and state_2_big = "{(0, AT2:0),(1, AT1:0),(2, A:0),(3, A:0)}\n0 4 0\n0011\n0000\n0000\n0000" |> Bigraph.Big.of_string in
     let trans_1 = 
         {Tracking_bigraph.TTS.in_state_idx=0;
         out_state_idx=1;
@@ -214,7 +214,7 @@ let test_perform_phase _ =
         out_state_idx=2;
         react_label="r1";
         participants=Bigraph.Iso.of_list [(0,0);(1,2);(2,3)];
-        residue=Bigraph.Fun.of_list [(0,0);(1,1);(2,2);(3,3)];
+        residue=Bigraph.Fun.of_list [(0,3);(1,2);(2,1);(3,0)];
         actual_out_state=state_2_big}
     and initial_ui_map =  Ui.make_map_of_list [(1,0);(2,1);(3,2);(4,3)]
     and first_new_ui = 5
@@ -235,7 +235,7 @@ let test_perform_phase _ =
             {
                 trans_fun=(Ssp.Template_state.parse_trans_fun trans_fun_raw_2);
                 ui2redex=[(1,0);(3,1);(4,2)] |> Ui.make_map_of_list;
-                ui2state=initial_ui_map;
+                ui2state=[ (1,3);(2,2);(3,1);(4,0)] |> Ui.make_map_of_list ;
                 first_new_ui=5;
                 time_change=(Common.IntSet.of_list [1],1)
             }
