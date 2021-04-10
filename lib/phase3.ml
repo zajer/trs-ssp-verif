@@ -26,9 +26,9 @@ let extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui
         new_objs;
         term_objs
     }
-type constructed_state = {state:Tracking_bigraph.TTS.state;ui_map:Ui.map;sat_config:Ssp.Template_state.t}
+type constructed_state = {state:Tracking_bigraph.TTS.state;ui_map:Ui.map;sat_config:Ssp.Template_state.t;time:int}
 let state2semi_state s = {Phase4.state=s.state;ui_map=s.ui_map}
-let semi_state2state s sat = {state=s.Phase4.state;ui_map=s.ui_map;sat_config=sat}
+let semi_state2state s sat time = {state=s.Phase4.state;ui_map=s.ui_map;sat_config=sat;time}
 let rec _construct_state 
     ~state_at_previous_moment
     ~state_currently_constructed
@@ -48,10 +48,10 @@ let rec _construct_state
     all_trans_by_keys 
     time_flow =
     match usable_ewalk with 
-    | [] -> {state=state_currently_constructed.state;ui_map=state_currently_constructed.ui_map;sat_config=state_currently_constructed.sat_config}, List.rev unused_ewalk,time_flow
+    | [] -> {state=state_currently_constructed.state;ui_map=state_currently_constructed.ui_map;sat_config=state_currently_constructed.sat_config;time=time_moment}, List.rev unused_ewalk,time_flow
     | h::t -> 
         if IntSet.cardinal ommited_agents = num_of_agents then 
-            {state=state_currently_constructed.state;ui_map=state_currently_constructed.ui_map;sat_config=state_currently_constructed.sat_config}, List.rev_append unused_ewalk usable_ewalk,time_flow
+            {state=state_currently_constructed.state;ui_map=state_currently_constructed.ui_map;sat_config=state_currently_constructed.sat_config;time=time_moment}, List.rev_append unused_ewalk usable_ewalk,time_flow
         else
             let involved_agents,time_needed = h.time_change in
             if not (IntSet.inter involved_agents ommited_agents |> IntSet.is_empty) then
@@ -106,7 +106,7 @@ let rec _construct_state
                                     trans_to_be_applied.react_label in
                     _construct_state 
                         ~state_at_previous_moment
-                        ~state_currently_constructed:(semi_state2state new_constructed_semi_state current_sat_config_after_transition )
+                        ~state_currently_constructed:(semi_state2state new_constructed_semi_state current_sat_config_after_transition time_moment )
                         ~usable_ewalk:t 
                         ~unused_ewalk
                         ommited_agents

@@ -90,7 +90,7 @@ let test_perform_phase_1 _ =
     and all_states = Phase3_tests_data.phase_test_one_agent_all_states
     and all_trans_by_idx = Phase3_tests_data.phase_test_one_agent_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_one_agent_all_trans_by_keys in
-    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
+    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config;time=constructed_time_moment-1} in
     let result_state,unused_ewalk,_ = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
@@ -123,7 +123,11 @@ let test_perform_phase_1 _ =
         ~msg:"Result SAT configuration is not equal to expected"
         ~printer:Ssp.Template_state.to_stirng
         expected_result_sat
-        result_state.sat_config
+        result_state.sat_config;
+    assert_equal
+        ~msg:"Result state's time moment is not equal to expected"
+        constructed_time_moment
+        result_state.time
 let test_perform_phase_2 _ =
     let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2)] |> Ui.make_map_of_list 
@@ -134,7 +138,7 @@ let test_perform_phase_2 _ =
     and all_states = Phase3_tests_data.phase_test_one_agent_all_states
     and all_trans_by_idx = Phase3_tests_data.phase_test_one_agent_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_one_agent_all_trans_by_keys in
-    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
+    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config;time=constructed_time_moment-1} in
     let result_state,unused_ewalk,_ = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
@@ -167,7 +171,11 @@ let test_perform_phase_2 _ =
         ~msg:"Result SAT configuration is not equal to expected"
         ~printer:Ssp.Template_state.to_stirng
         expected_result_sat
-        result_state.sat_config
+        result_state.sat_config;
+    assert_equal
+        ~msg:"Result state's time moment is not equal to expected"
+        constructed_time_moment
+        result_state.time
 let test_perform_phase_3 _ =
     let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
@@ -178,7 +186,7 @@ let test_perform_phase_3 _ =
     and all_states = Phase3_tests_data.phase_test_two_agents_all_states
     and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
-    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
+    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config;time=constructed_time_moment-1} in
     let result_state,unused_ewalk,_ = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
@@ -212,7 +220,11 @@ let test_perform_phase_3 _ =
         ~msg:"Result SAT configuration is not equal to expected"
         ~printer:Ssp.Template_state.to_stirng
         expected_result_sat
-        result_state.sat_config
+        result_state.sat_config;
+    assert_equal
+        ~msg:"Result state's time moment is not equal to expected"
+        constructed_time_moment
+        result_state.time
 let test_perform_phase_4 _ =
     let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
@@ -223,7 +235,7 @@ let test_perform_phase_4 _ =
     and all_states = Phase3_tests_data.phase_test_two_agents_all_states
     and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
-    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
+    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config;time=constructed_time_moment-1} in
     let result_state,unused_ewalk,_ = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
@@ -257,7 +269,11 @@ let test_perform_phase_4 _ =
         ~msg:"Result SAT configuration is not equal to expected"
         ~printer:Ssp.Template_state.to_stirng
         expected_result_sat
-        result_state.sat_config
+        result_state.sat_config;
+    assert_equal
+        ~msg:"Result state's time moment is not equal to expected"
+        constructed_time_moment
+        result_state.time
 let test_perform_phase_5 _ =
     let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
@@ -268,7 +284,7 @@ let test_perform_phase_5 _ =
     and all_states = Phase3_tests_data.phase_test_two_agents_all_states
     and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
-    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config} in
+    let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config;time=constructed_time_moment-1} in
     let result_state,unused_ewalk,_ = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
@@ -310,7 +326,11 @@ let test_perform_phase_5 _ =
         ~msg:"Result SAT configuration is not equal to expected"
         ~printer:Ssp.Template_state.to_stirng
         expected_result_sat
-        result_state.sat_config
+        result_state.sat_config;
+    assert_equal
+        ~msg:"Result state's time moment is not equal to expected"
+        constructed_time_moment
+        result_state.time
 let suite =
     "Phase 3" >::: [
         "Extracting time info test 1 - no new or deleted objects">:: test_extract_time_info_1;
