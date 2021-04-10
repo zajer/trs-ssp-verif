@@ -48,5 +48,10 @@ let is_subset ~target ~subset =
             false
 let domain map = 
     IntMappingsSet.elements map |> List.map (fun (d,_)-> d)
+let inverse map = 
+    let source = IntMappingsSet.elements map in
+    let inverse_source = List.map (fun (i1,i2)-> i2,i1) source in
+    let result = make_map_of_list inverse_source in
+    result
 let mapping_to_string (i1,i2) = "("^(string_of_int i1 )^","^(string_of_int i2)^")"
 let map_to_string map = let res = IntMappingsSet.elements map |> List.map (fun mapping -> mapping_to_string mapping) |> String.concat ";" in "{"^res^"}"

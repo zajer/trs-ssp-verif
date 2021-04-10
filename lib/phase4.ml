@@ -17,7 +17,7 @@ let is_update_possible state ~ui2state_map ~ui2par_map trans_to_be_applied all_t
     let key = state.TTS.index,trans_to_be_applied.TTS.react_label in
     let known_similar_transitions = Hashtbl.find_all all_trans key in
     _find_trans_allowing_for_update ~ui2state_map ~ui2par_map known_similar_transitions
-let _is_function_injective f = 
+(*let _is_function_injective f = 
     let codom = Bigraph.Fun.codom f 
     and fun_as_list = Bigraph.Fun.to_list f in
     if Bigraph.IntSet.cardinal codom = List.length fun_as_list then
@@ -35,15 +35,15 @@ let _update_mapping_with_new_objs ui_to_update residue output_state new_ui =
         ([],0) in
     let result = List.mapi (fun i unmapped_node_id -> new_ui+i, unmapped_node_id) nodes_unmapped_by_residue in
     let mapping_of_new_elems = Ui.make_map_of_list result in
-    Ui.union ~base:ui_to_update ~extension:mapping_of_new_elems,num_of_unmapped_nodes+new_ui
+    Ui.union ~base:ui_to_update ~extension:mapping_of_new_elems,num_of_unmapped_nodes+new_ui*)
 let update ui2state_map trans all_states first_new_ui = 
-    match _is_function_injective trans.TTS.residue with
+    match Common.is_function_injective trans.TTS.residue with
     | false -> raise (Invalid_argument "Residue is not an injective function")
     | true -> 
         let residue_inverted = Bigraph.Fun.to_list trans.residue |> List.map (fun (i1,i2)-> i2,i1) |> Ui.make_map_of_list in
         let ui2state_map_updated_by_residue = Ui.transform_codom false ~transformed_mapping:ui2state_map ~codom_mapping:residue_inverted 
         and result_state = {TTS.bigraph=(Hashtbl.find all_states trans.out_state_idx);index=trans.out_state_idx} in
-        let result_ui2state_map,new_first_ui_val = _update_mapping_with_new_objs ui2state_map_updated_by_residue trans.residue result_state.bigraph.n first_new_ui in
+        let result_ui2state_map,new_first_ui_val = Common.update_mapping_with_new_objs ui2state_map_updated_by_residue trans.residue result_state.bigraph.n first_new_ui in
         {TTS.bigraph=(Hashtbl.find all_states trans.out_state_idx);index=trans.out_state_idx},result_ui2state_map,new_first_ui_val
 exception Not_updateable of string
 let perform_phase ~current_state ~current_state_mapping ~previous_state ~previous_state_mapping ~mapping_on_redex trans_on_walk first_new_ui all_states all_trans =
