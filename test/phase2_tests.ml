@@ -222,7 +222,7 @@ let test_perform_phase _ =
     let all_states = List.to_seq [(1,state_1_big);(2,state_2_big)] |> Hashtbl.of_seq
     and all_trans = List.to_seq [(1,trans_1);(2,trans_2)] |> Hashtbl.of_seq
     and raw_walk = [trans_fun_raw_1;trans_fun_raw_2] in
-    let result = Phase2.perform_phase raw_walk initial_ui_map num_of_agents first_new_ui all_states all_trans 
+    let result = Phase2.perform_phase raw_walk initial_ui_map ~num_of_agents ~first_new_ui all_states all_trans 
     and expected_result = 
         [
             {
