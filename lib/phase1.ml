@@ -1,4 +1,4 @@
-type result = {is_successful:bool; value:(Phase3.constructed_state list * Phase3.time_info list) option; error_message:string option}
+type result = {is_successful:bool; value:Phase3.constructed_state list * Phase3.time_info list; error_message:string option}
 type _construciton_params = 
     {
         current_state:Phase3.constructed_state;
@@ -13,8 +13,7 @@ let _update_result_value res new_val =
     {is_successful=res.is_successful;value=new_val;error_message=res.error_message}
 let _append_partial_result current_result new_state new_time_info =
     match current_result.value with
-    | None -> Some ([new_state],new_time_info) |> _update_result_value current_result
-    | Some (vsl,vtil) -> Some (new_state::vsl, List.rev_append new_time_info vtil) |> _update_result_value current_result
+    | (vsl,vtil) -> (new_state::vsl, List.rev_append new_time_info vtil) |> _update_result_value current_result
 let _update_params current_params state ewalk =
     {
         current_state=state;
@@ -33,6 +32,8 @@ let rec _proceed_with_construction_of_result current_result params operation =
         | [] -> current_result
         | _ ->
             try
+                "time:"^(string_of_int params.current_time) |> print_endline ;
+                "length of walk:"^(string_of_int (List.length params.usable_ewalk)) |> print_endline ;
                 let new_state,rest_of_ewalk,new_time_infos = 
                     Phase3.perform_phase
                         params.current_state
@@ -44,12 +45,10 @@ let rec _proceed_with_construction_of_result current_result params operation =
                         params.all_trans_by_key in
                 let new_current_result = _append_partial_result current_result new_state new_time_infos 
                 and new_params = _update_params params new_state rest_of_ewalk  in
-                    _proceed_with_construction_of_result (operation (new_state,new_time_infos) new_current_result) new_params operation
-                    
-                        
+                    _proceed_with_construction_of_result (operation (new_state,new_time_infos) new_current_result) new_params operation  
             with
-            | Phase4.Not_updateable s -> {is_successful=false;value=current_result.value;error_message=Some s}
-let _initial_result = {is_successful=true; value=None; error_message=None}
+            | Phase4.Not_updateable s -> {is_successful=false;value=current_result.value;error_message=Some (s^" while constructing a state at the moment:"^(string_of_int (params.current_time+1)))}
+let _initial_result init_state = {is_successful=true; value=([init_state],[]); error_message=None}
 let _initial_ui_map_on_nodes ~num_of_nodes =
     List.init num_of_nodes (fun i -> i+1,i ) |> Ui.make_map_of_list
 let _initial_sat_config ~num_of_agents = 
@@ -77,7 +76,10 @@ let _construct_result ~initial_state ~num_of_agents ~whole_ewalk all_states_by_i
             all_trans_by_idx;
             all_trans_by_key
         } in
-    _proceed_with_construction_of_result initial_result initial_params operation
+    _proceed_with_construction_of_result (initial_result initial_state) initial_params operation
+let _invert_order_of_constructed_states res =
+    match res.value with
+    | (vsl,vtil) -> ((List.rev vsl), vtil) |> _update_result_value res
 let perform_phase raw_walk ~num_of_agents all_states_by_idx all_trans_by_idx all_trans_by_key operation =
     assert ( (List.compare_length_with raw_walk 0) > 0 );
     Ssp.Template_state._number_of_agents:=num_of_agents;
@@ -94,4 +96,5 @@ let perform_phase raw_walk ~num_of_agents all_states_by_idx all_trans_by_idx all
         ~num_of_agents
         ~whole_ewalk:ewalk
         all_states_by_idx all_trans_by_idx all_trans_by_key operation
+    |> _invert_order_of_constructed_states
 
