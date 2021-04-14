@@ -1,5 +1,4 @@
-module IntSet = Set.Make(Int)
-type extended_walk_element = {trans_fun:State_space.trans_fun;ui2redex:Ui.map;ui2state:Ui.map;first_new_ui:int;time_change:(IntSet.t*int)}
+type extended_walk_element = {trans_fun:State_space.trans_fun;ui2redex:Ui.map;ui2state:Ui.map;first_new_ui:int;time_change:(Common.IntSet.t*int)}
 type extended_walk = extended_walk_element list
 (*let first ewalk = 
     match ewalk with
@@ -50,11 +49,11 @@ let rec _construct_state
     match usable_ewalk with 
     | [] -> {state=state_currently_constructed.state;ui_map=state_currently_constructed.ui_map;sat_config=state_currently_constructed.sat_config;time=time_moment}, List.rev unused_ewalk,time_flow
     | h::t -> 
-        if IntSet.cardinal ommited_agents = num_of_agents then 
+        if Common.IntSet.cardinal ommited_agents = num_of_agents then 
             {state=state_currently_constructed.state;ui_map=state_currently_constructed.ui_map;sat_config=state_currently_constructed.sat_config;time=time_moment}, List.rev_append unused_ewalk usable_ewalk,time_flow
         else
             let involved_agents,time_needed = h.time_change in
-            if not (IntSet.inter involved_agents ommited_agents |> IntSet.is_empty) then
+            if not (Common.IntSet.inter involved_agents ommited_agents |> Common.IntSet.is_empty) then
                 _construct_state 
                     ~state_at_previous_moment
                     ~state_currently_constructed
@@ -70,14 +69,14 @@ let rec _construct_state
             else
                 let current_sat_config_after_transition = agents_update state_currently_constructed.sat_config h.time_change in
                 let set_of_agents_in_future = agents_in_future current_sat_config_after_transition time_moment in
-                let num_of_agents_in_future = IntSet.cardinal set_of_agents_in_future in
+                let num_of_agents_in_future = Common.IntSet.cardinal set_of_agents_in_future in
                 if not (num_of_agents_in_future = 0) then
                     _construct_state 
                         ~state_at_previous_moment
                         ~state_currently_constructed
                         ~usable_ewalk:t 
                         ~unused_ewalk:(h::unused_ewalk) 
-                        (IntSet.union ommited_agents set_of_agents_in_future) 
+                        (Common.IntSet.union ommited_agents set_of_agents_in_future) 
                         ~time_moment 
                         ~num_of_agents
                         all_states 
@@ -130,7 +129,7 @@ let perform_phase
                     ~state_currently_constructed:state_at_previous_moment
                     ~usable_ewalk:ewalk
                     ~unused_ewalk:[]
-                    IntSet.empty
+                    Common.IntSet.empty
                     ~time_moment:constructed_time_moment 
                     ~num_of_agents 
                     all_states 
