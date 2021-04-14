@@ -42,7 +42,7 @@ let rec _transform_raw_walk raw_walk result_extended_walk all_states_by_idx all_
         let ui2redex,new_current_ui_map,new_first_new_ui = transform_ui_map (Hashtbl.find all_trans_by_idx parsed_trans.transition_idx) current_ui_map first_new_ui all_states_by_idx in
         let new_extended_walk_elem = {Phase3.trans_fun=parsed_trans;ui2redex;ui2state=new_current_ui_map;first_new_ui=new_first_new_ui;time_change} in
             _transform_raw_walk t (new_extended_walk_elem::result_extended_walk) all_states_by_idx all_trans_by_idx new_current_ui_map (parsed_trans.func current_state) new_first_new_ui
-let perform_phase raw_walk initial_ui_map num_of_agents first_new_ui all_states all_trans =
+let perform_phase raw_walk initial_ui_map ~num_of_agents ~first_new_ui all_states all_trans =
     let initial_state = Array.init num_of_agents (fun i -> i+1,0) in
     _transform_raw_walk
         raw_walk

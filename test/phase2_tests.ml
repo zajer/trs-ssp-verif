@@ -172,7 +172,7 @@ let _assert_equality_of_extended_walk_elements (expected_ewe:Phase3.extended_wal
         ~cmp:Ui.are_equal
         ~printer:(fun ui_map -> Ui.map_to_string ui_map)
         expected_ewe.ui2redex
-       actual_ewe.ui2redex;
+        actual_ewe.ui2redex;
     assert_equal
         ~msg:("The map of UIs on state in "^msg)
         ~cmp:Ui.are_equal
@@ -197,7 +197,7 @@ let _assert_equality_of_extended_walk_elements (expected_ewe:Phase3.extended_wal
         expected_ewe.time_change
         actual_ewe.time_change;;
 Ssp.Template_state._number_of_agents :=2
-let test_perform_phase _ =
+let test_perform_phase_1 _ =
     let trans_fun_raw_1 = {Ssp.State.permutation_with_time_shift=[(2,1);(1,0)]; react_label="r1"; from_idx=0; to_idx=1; transition_idx=1} 
     and trans_fun_raw_2 = {Ssp.State.permutation_with_time_shift=[(1,0);(2,1)]; react_label="r1"; from_idx=1; to_idx=2; transition_idx=2} 
     and state_1_big = "{(0, A:0),(1, A:0),(2, AT1:0),(3, AT2:0)}\n0 4 0\n0000\n0000\n1000\n0100" |> Bigraph.Big.of_string
@@ -222,7 +222,7 @@ let test_perform_phase _ =
     let all_states = List.to_seq [(1,state_1_big);(2,state_2_big)] |> Hashtbl.of_seq
     and all_trans = List.to_seq [(1,trans_1);(2,trans_2)] |> Hashtbl.of_seq
     and raw_walk = [trans_fun_raw_1;trans_fun_raw_2] in
-    let result = Phase2.perform_phase raw_walk initial_ui_map num_of_agents first_new_ui all_states all_trans 
+    let result = Phase2.perform_phase raw_walk initial_ui_map ~num_of_agents ~first_new_ui all_states all_trans 
     and expected_result = 
         [
             {
@@ -254,6 +254,81 @@ let test_perform_phase _ =
         "the second element of the result extended walk is not equal to expected"
 
 (*przemieszać indeksy wierzchołków *)
+let _map_states_to_idx list = 
+    let result = Hashtbl.create (List.length list) in
+    List.iter (fun state -> Hashtbl.add result state.Tracking_bigraph.TTS.index state.bigraph  ) list;
+    result
+let _map_trans_to_idx list = 
+    let result = Hashtbl.create (List.length list) in
+    List.iteri (fun i trans -> Hashtbl.add result i trans  ) list;
+    result
+let test_perform_phase_2 _ =
+    let states_filename = "exmp_1_states.csv"
+    and trans_filename = "exmp_1_trans_normed.csv"
+    and walk_filename = "exmp_1_walk.csv" in
+    let states = Tracking_bigraph.TTS.import_states states_filename
+    and trans = Tracking_bigraph.TTS.import_transitions ~headers_in_first_row:false trans_filename
+    and raw_walk = Ssp.Frontend.import_trans_funs walk_filename in
+    let all_states = _map_states_to_idx states
+    and all_trans = _map_trans_to_idx trans
+    and initial_ui_map =  Ui.make_map_of_list [(1,0);(2,1);(3,2);(4,3);(5,4)]
+    and first_new_ui = 6
+    and num_of_agents = 2 in
+    let result = Phase2.perform_phase raw_walk initial_ui_map ~num_of_agents ~first_new_ui all_states all_trans 
+    and expected_result = 
+        [
+            {
+                Phase3.trans_fun=(Ssp.Template_state.parse_trans_fun (List.nth raw_walk 0));
+                ui2redex=[(1,0);(2,1);(4,2)] |> Ui.make_map_of_list;
+                ui2state=[(1,0);(4,1);(2,2);(3,3);(5,4)] |> Ui.make_map_of_list ;
+                first_new_ui=6;
+                time_change=(Common.IntSet.of_list [1],3)
+            };
+            {
+                trans_fun=(Ssp.Template_state.parse_trans_fun (List.nth raw_walk 1));
+                ui2redex=[(4,0);(2,1);(5,2)] |> Ui.make_map_of_list;
+                ui2state=[ (4,0);(5,1);(2,2);(1,3);(3,4)] |> Ui.make_map_of_list ;
+                first_new_ui=6;
+                time_change=(Common.IntSet.of_list [1],2)
+            };
+            {
+                trans_fun=(Ssp.Template_state.parse_trans_fun (List.nth raw_walk 2));
+                ui2redex=[(1,0);(3,1);(4,2)] |> Ui.make_map_of_list;
+                ui2state=[ (1,0);(4,1);(3,2);(5,3);(2,4)] |> Ui.make_map_of_list ;
+                first_new_ui=6;
+                time_change=(Common.IntSet.of_list [2],3)
+            };
+            {
+                trans_fun=(Ssp.Template_state.parse_trans_fun (List.nth raw_walk 3));
+                ui2redex=[(4,0);(3,1);(5,2)] |> Ui.make_map_of_list;
+                ui2state=[ (4,0);(5,1);(2,2);(1,3);(3,4)] |> Ui.make_map_of_list ;
+                first_new_ui=6;
+                time_change=(Common.IntSet.of_list [2],2)
+            };
+        ] in
+    assert_equal
+        ~msg:"The length of result extended walk is not equal to expected"
+        ~printer:(fun i -> string_of_int i)
+        (List.length expected_result)
+        (List.length result);
+    _assert_equality_of_extended_walk_elements
+        (List.nth expected_result 0)
+        (List.nth result 0)
+        " the first element of the result extended walk is not equal to expected";
+    _assert_equality_of_extended_walk_elements
+        (List.nth expected_result 1)
+        (List.nth result 1)
+        " the second element of the result extended walk is not equal to expected";
+    _assert_equality_of_extended_walk_elements
+        (List.nth expected_result 2)
+        (List.nth result 2)
+        " the third element of the result extended walk is not equal to expected";
+    _assert_equality_of_extended_walk_elements
+        (List.nth expected_result 3)
+        (List.nth result 3)
+        " the fourth element of the result extended walk is not equal to expected"
+
+
 let suite =
     "Phase 2" >::: [
         "Generating mapping of UI on redex test">:: test_gen_ui2redex;
@@ -263,7 +338,8 @@ let suite =
         "Transforming map of unique identifiers test 2 - deleted objects">:: test_transform_ui_map_2;
         "Transforming map of unique identifiers test 3 - new objects">:: test_transform_ui_map_3;
         "Transforming map of unique identifiers test 4 - new and deleted objects">:: test_transform_ui_map_4;
-        "Performing phase test">::test_perform_phase
+        "Performing phase test 1">::test_perform_phase_1;
+        "Performing phase test 2">::test_perform_phase_2;
     ]
 
 let () =

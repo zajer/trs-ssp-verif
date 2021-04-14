@@ -5,6 +5,7 @@
         phase4_tests
         phase3_tests
         phase2_tests
+        phase1_tests
     ) 
     (libraries ounit2 ssp_verification tracking_bigraph )
 )
