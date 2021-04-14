@@ -5,7 +5,7 @@ type extended_walk = extended_walk_element list
     match ewalk with
     | [] -> raise Not_found
     | h::t -> h,t*)
-type mapped_trans_by_idx = (int,Tracking_bigraph.TTS.trans_exported) Hashtbl.t
+type trans_mapped_by_idx = (int,Tracking_bigraph.TTS.trans_exported) Hashtbl.t
 let corr_trans all_trans trans_fun =
     let trans_id = trans_fun.Ssp.Template_state.transition_idx in
     Hashtbl.find all_trans trans_id

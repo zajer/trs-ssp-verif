@@ -6,8 +6,8 @@ type _construciton_params =
         current_time:int;
         number_of_agents:int;
         all_states:(int,Bigraph.Big.t) Hashtbl.t;
-        all_trans_by_idx:Phase3.mapped_trans_by_idx;
-        all_trans_by_key:Phase4.mapped_trans_by_key;
+        all_trans_by_idx:Phase3.trans_mapped_by_idx;
+        all_trans_by_key:Phase4.trans_mapped_by_key;
     }
 let _update_result_value res new_val = 
     {is_successful=res.is_successful;value=new_val;error_message=res.error_message}
