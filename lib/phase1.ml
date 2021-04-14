@@ -86,7 +86,7 @@ let perform_phase raw_walk ~num_of_agents all_states_by_idx all_trans_by_idx all
         raw_walk 
         (initial_state.ui_map) 
         ~num_of_agents 
-        ~first_new_ui:(Ui.IntMappingsSet.max_elt initial_state.ui_map |> fun (i,_)->i+1 ) 
+        ~first_new_ui:(Ui.UIMappingsSet.max_elt initial_state.ui_map |> fun (i,_)->i+1 ) 
         all_states_by_idx 
         all_trans_by_idx in
     _construct_result 

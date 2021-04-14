@@ -7,8 +7,8 @@ let test_transform_codom_1 _ =
   and expected_result = Ui.make_map_of_list [(7,0);(21,1);(777,2)] in
   assert_equal
     ~msg:"Result mapping is not equal to expected"
-    ~printer:(fun s -> let set_as_str = Ui.IntMappingsSet.elements s |> List.map (fun (ui,v)-> "("^(string_of_int ui)^","^(string_of_int v)^")" ) |> String.concat ";" in "{"^set_as_str^"}" )
-    ~cmp:Ui.IntMappingsSet.equal
+    ~printer:(fun s -> let set_as_str = Ui.UIMappingsSet.elements s |> List.map (fun (ui,v)-> "("^(string_of_int ui)^","^(string_of_int v)^")" ) |> String.concat ";" in "{"^set_as_str^"}" )
+    ~cmp:Ui.UIMappingsSet.equal
     expected_result
     result
 let test_transform_codom_2 _ =
@@ -18,8 +18,8 @@ let test_transform_codom_2 _ =
   and expected_result = Ui.make_map_of_list [(7,0);(21,1);(777,21)] in
   assert_equal
     ~msg:"Result mapping is not equal to expected"
-    ~printer:(fun s -> let set_as_str = Ui.IntMappingsSet.elements s |> List.map (fun (ui,v)-> "("^(string_of_int ui)^","^(string_of_int v)^")" ) |> String.concat ";" in "{"^set_as_str^"}" )
-    ~cmp:Ui.IntMappingsSet.equal
+    ~printer:(fun s -> let set_as_str = Ui.UIMappingsSet.elements s |> List.map (fun (ui,v)-> "("^(string_of_int ui)^","^(string_of_int v)^")" ) |> String.concat ";" in "{"^set_as_str^"}" )
+    ~cmp:Ui.UIMappingsSet.equal
     expected_result
     result
 let test_transform_codom_3 _ =
@@ -29,8 +29,8 @@ let test_transform_codom_3 _ =
   and expected_result = Ui.make_map_of_list [(7,0);(21,1)] in
   assert_equal
     ~msg:"Result mapping is not equal to expected"
-    ~printer:(fun s -> let set_as_str = Ui.IntMappingsSet.elements s |> List.map (fun (ui,v)-> "("^(string_of_int ui)^","^(string_of_int v)^")" ) |> String.concat ";" in "{"^set_as_str^"}" )
-    ~cmp:Ui.IntMappingsSet.equal
+    ~printer:(fun s -> let set_as_str = Ui.UIMappingsSet.elements s |> List.map (fun (ui,v)-> "("^(string_of_int ui)^","^(string_of_int v)^")" ) |> String.concat ";" in "{"^set_as_str^"}" )
+    ~cmp:Ui.UIMappingsSet.equal
     expected_result
     result
 let test_if_is_subset_1 _ = 
