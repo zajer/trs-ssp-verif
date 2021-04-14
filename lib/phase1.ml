@@ -32,8 +32,6 @@ let rec _proceed_with_construction_of_result current_result params operation =
         | [] -> current_result
         | _ ->
             try
-                "time:"^(string_of_int params.current_time) |> print_endline ;
-                "length of walk:"^(string_of_int (List.length params.usable_ewalk)) |> print_endline ;
                 let new_state,rest_of_ewalk,new_time_infos = 
                     Phase3.perform_phase
                         params.current_state

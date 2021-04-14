@@ -147,10 +147,35 @@ let test_perform_phase_2 _ =
         ~printer:(fun sl -> let result = List.map _constructed_state2string sl |> String.concat "\n\t" in "\n[\n\t"^result^"\n]" )
         expected_states
         result_constructed_states   
+let test_perform_phase_3 _ = 
+    let states_filename = "exmp_3_states.csv"
+    and trans_filename = "exmp_3_trans.csv"
+    and walk_filename = "exmp_3_walk.csv"
+    and number_of_agents = 2 in
+    let states = Tracking_bigraph.TTS.import_states states_filename
+    and trans = Tracking_bigraph.TTS.import_transitions ~headers_in_first_row:true trans_filename
+    and walk = Ssp.Frontend.import_trans_funs walk_filename in
+    let states_by_idx = _map_states_to_idx states
+    and trans_by_idx = _map_trans_to_idx trans
+    and trans_by_key = _map_trans_to_key trans in
+    let result = Phase1.perform_phase walk ~num_of_agents:number_of_agents states_by_idx trans_by_idx trans_by_key (fun _ x -> x)
+    and expected_status = false 
+    and expected_error_message = "Previous state is not updateable while constructing a state at the moment:1"
+     in
+    assert_equal
+        ~msg:"Phase 1 should end successfuly"
+        expected_status
+        result.is_successful;
+    assert_equal
+        ~msg:"The reason of failure is not equal to expected"
+        ~printer:(fun s -> s)
+        expected_error_message
+        (result.error_message |> Option.get)
 let suite =
     "Phase 1" >::: [
         "Perform phase test 1">:: test_perform_phase_1;
         "Perform phase test 2">:: test_perform_phase_2;
+        "Perform phase test 3 - it should not succeed">:: test_perform_phase_3;
     ]
 
 let () =
