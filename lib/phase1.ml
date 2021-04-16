@@ -9,6 +9,32 @@ type _construciton_params =
         all_trans_by_idx:Phase3.trans_mapped_by_idx;
         all_trans_by_key:Phase4.trans_mapped_by_key;
     }
+module ResultTransformer = struct
+    type t = Phase3.constructed_state * (Phase3.time_info list)
+    type o = t -> result -> result
+
+    let stack (o1 : o) (o2:o) : o =
+        fun rt r -> o2 rt (o1 rt r)
+    let apply (rm: t) (r:result) (op:o) : result =
+        op rm r
+end
+module BuildinTransformers = struct
+    let _does_pattern_in_constructed_state_occur cs patterns =
+        let state_bigraph = cs.Phase3.state.bigraph in
+        let result = List.find_opt 
+            (
+                fun p -> 
+                    let occs = Bigraph.Big.occurrences ~target:state_bigraph ~pattern:(p.Ssp_bridge.Patterns.bigraph) in
+                    List.compare_length_with occs 0 > 0
+            )
+            patterns in
+        result
+    let disqualify_results_if_pattern_detected patterns ((part_res_cs,_) : ResultTransformer.t ) current_result =
+        match _does_pattern_in_constructed_state_occur part_res_cs patterns with
+        | None -> current_result
+        | Some p -> {is_successful=false; value=current_result.value;error_message=Some p.description}
+    
+end
 let _update_result_value res new_val = 
     {is_successful=res.is_successful;value=new_val;error_message=res.error_message}
 let _append_partial_result current_result new_state new_time_info =
@@ -43,7 +69,7 @@ let rec _proceed_with_construction_of_result current_result params operation =
                         params.all_trans_by_key in
                 let new_current_result = _append_partial_result current_result new_state new_time_infos 
                 and new_params = _update_params params new_state rest_of_ewalk  in
-                    _proceed_with_construction_of_result (operation (new_state,new_time_infos) new_current_result) new_params operation  
+                    _proceed_with_construction_of_result (ResultTransformer.apply (new_state,new_time_infos) new_current_result operation) new_params operation  
             with
             | Phase4.Not_updateable s -> {is_successful=false;value=current_result.value;error_message=Some (s^" while constructing a state at the moment:"^(string_of_int (params.current_time+1)))}
 let _initial_result init_state = {is_successful=true; value=([init_state],[]); error_message=None}

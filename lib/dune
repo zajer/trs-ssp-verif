@@ -1,5 +1,5 @@
 
 (library
   (name ssp_verification)
-  ( libraries bigraph tracking_bigraph csv ssp )
+  ( libraries bigraph tracking_bigraph csv ssp ssp_bridge )
 )
