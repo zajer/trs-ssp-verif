@@ -6,7 +6,7 @@ module ResultTransformer : sig
     val stack : o -> o -> o
     val apply : t -> result -> o -> result
 end
-module BuildinTransformers : sig
+module BasicTransformers : sig
     val disqualify_results_if_pattern_detected : Ssp_bridge.Patterns.pattern list -> ResultTransformer.t -> result -> result
     val disqualify_results_if_scenario_takes_too_long : int -> ResultTransformer.t -> result -> result
 end

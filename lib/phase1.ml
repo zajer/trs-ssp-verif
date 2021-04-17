@@ -18,7 +18,7 @@ module ResultTransformer = struct
     let apply (rm: t) (r:result) (op:o) : result =
         op rm r
 end
-module BuildinTransformers = struct
+module BasicTransformers = struct
     let _does_pattern_in_constructed_state_occur cs patterns =
         let state_bigraph = cs.Phase3.state.bigraph in
         let result = List.find_opt 

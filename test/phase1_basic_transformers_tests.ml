@@ -7,7 +7,7 @@ let test_pattern_detection_1 _ =
     and state = {Phase3.state={Tracking_bigraph.TTS.bigraph=state_big;index=3};ui_map=Ui.empty_map;sat_config=[||];time=777} in
     let current_res = {Phase1.is_successful=true;value=[],[];error_message=None} 
     and current_part_res = state,[]
-    and transformer = Phase1.BuildinTransformers.disqualify_results_if_pattern_detected [pattern] in
+    and transformer = Phase1.BasicTransformers.disqualify_results_if_pattern_detected [pattern] in
     let result = Phase1.ResultTransformer.apply current_part_res current_res transformer
     and expected_result = current_res in
     assert_equal
@@ -21,7 +21,7 @@ let test_pattern_detection_2 _ =
     and state = {Phase3.state={Tracking_bigraph.TTS.bigraph=state_big;index=3};ui_map=Ui.empty_map;sat_config=[||];time=777} in
     let current_res = {Phase1.is_successful=true;value=[],[];error_message=None} 
     and current_part_res = state,[]
-    and transformer = Phase1.BuildinTransformers.disqualify_results_if_pattern_detected [pattern] in
+    and transformer = Phase1.BasicTransformers.disqualify_results_if_pattern_detected [pattern] in
     let result = Phase1.ResultTransformer.apply current_part_res current_res transformer
     and expected_result = {Phase1.is_successful=false;value=[],[];error_message=Some "Forbidden pattern detected:agent in AT3"}  in
     assert_equal
@@ -38,8 +38,8 @@ let test_pattern_detection_3 _ =
     and state = {Phase3.state={Tracking_bigraph.TTS.bigraph=state_big;index=3};ui_map=Ui.empty_map;sat_config=[||];time=777} in
     let current_res = {Phase1.is_successful=true;value=[],[];error_message=None} 
     and current_part_res = state,[]
-    and transformer_1 = Phase1.BuildinTransformers.disqualify_results_if_pattern_detected [pattern_1] 
-    and transformer_2 = Phase1.BuildinTransformers.disqualify_results_if_pattern_detected [pattern_2] in
+    and transformer_1 = Phase1.BasicTransformers.disqualify_results_if_pattern_detected [pattern_1] 
+    and transformer_2 = Phase1.BasicTransformers.disqualify_results_if_pattern_detected [pattern_2] in
     let stacked_transformer_1 = Phase1.ResultTransformer.stack transformer_1 transformer_2 
     and stacked_transformer_2 = Phase1.ResultTransformer.stack transformer_2 transformer_1 in
     let result_1 = Phase1.ResultTransformer.apply current_part_res current_res stacked_transformer_1
@@ -66,7 +66,7 @@ let test_max_time_filter_1 _ =
     and max_allowed_time = 10 in
     let current_res = {Phase1.is_successful=true;value=[],[];error_message=None} 
     and current_part_res = state,time_infos
-    and transformer = Phase1.BuildinTransformers.disqualify_results_if_scenario_takes_too_long max_allowed_time in
+    and transformer = Phase1.BasicTransformers.disqualify_results_if_scenario_takes_too_long max_allowed_time in
     let result = Phase1.ResultTransformer.apply current_part_res current_res transformer 
     and expected_result = current_res in
         assert_equal
@@ -85,7 +85,7 @@ let test_max_time_filter_2 _ =
     and max_allowed_time = 10 in
     let current_res = {Phase1.is_successful=true;value=[],[];error_message=None} 
     and current_part_res = state,time_infos
-    and transformer = Phase1.BuildinTransformers.disqualify_results_if_scenario_takes_too_long max_allowed_time in
+    and transformer = Phase1.BasicTransformers.disqualify_results_if_scenario_takes_too_long max_allowed_time in
     let result = Phase1.ResultTransformer.apply current_part_res current_res transformer 
     and expected_result = {Phase1.is_successful=false;value=[],[];error_message=Some ("At least one of the actions in the scenario ends after moment:"^(string_of_int max_allowed_time))}  in
         assert_equal
