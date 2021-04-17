@@ -8,7 +8,7 @@ module ResultTransformer : sig
 end
 module BuildinTransformers : sig
     val disqualify_results_if_pattern_detected : Ssp_bridge.Patterns.pattern list -> ResultTransformer.t -> result -> result
-    
+    val disqualify_results_if_scenario_takes_too_long : int -> ResultTransformer.t -> result -> result
 end
 val perform_phase : 
     Ssp.State.trans_fun_raw list ->

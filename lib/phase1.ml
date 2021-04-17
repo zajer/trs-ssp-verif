@@ -33,7 +33,12 @@ module BuildinTransformers = struct
         match _does_pattern_in_constructed_state_occur part_res_cs patterns with
         | None -> current_result
         | Some p -> {is_successful=false; value=current_result.value;error_message=Some p.description}
-    
+    let _does_any_action_end_after_moment time_infos moment =
+        List.exists (fun ti -> ti.Phase3.end_time > moment ) time_infos
+    let disqualify_results_if_scenario_takes_too_long max_time (_,time_infos) current_result =
+        match _does_any_action_end_after_moment time_infos max_time with
+        | false -> current_result
+        | true -> {is_successful=false; value=current_result.value;error_message=Some ("At least one of the actions in the scenario ends after moment:"^(string_of_int max_time))}
 end
 let _update_result_value res new_val = 
     {is_successful=res.is_successful;value=new_val;error_message=res.error_message}
