@@ -1,5 +1,6 @@
 
 (library
   (name ssp_verification)
+  (preprocess (pps ppx_yojson_conv))
   ( libraries bigraph tracking_bigraph csv ssp ssp_bridge )
 )
