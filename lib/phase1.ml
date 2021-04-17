@@ -32,7 +32,7 @@ module BuildinTransformers = struct
     let disqualify_results_if_pattern_detected patterns ((part_res_cs,_) : ResultTransformer.t ) current_result =
         match _does_pattern_in_constructed_state_occur part_res_cs patterns with
         | None -> current_result
-        | Some p -> {is_successful=false; value=current_result.value;error_message=Some p.description}
+        | Some p -> {is_successful=false; value=current_result.value;error_message=Some ("Forbiden pattern detected:"^p.description)}
     let _does_any_action_end_after_moment time_infos moment =
         List.exists (fun ti -> ti.Phase3.end_time > moment ) time_infos
     let disqualify_results_if_scenario_takes_too_long max_time (_,time_infos) current_result =
