@@ -1,10 +1,10 @@
 type state_serialization_config = {file_prefix:string; control2shape:(string,string)Hashtbl.t; control2color:(string,string) Hashtbl.t}
 type node = {id:int;label:string;shape:string;color:string}
-[@@deriving yojson_of]
+[@@deriving yojson_of, show]
 type edge = { from: int; to_:int[@key "to"]; arrows: string }
-[@@deriving yojson_of]
+[@@deriving yojson_of, show]
 type network_data = { nodes : node list; edges:edge list}
-[@@deriving yojson_of]
+[@@deriving yojson_of, show]
 let _default_string_fun = fun str_opt -> match str_opt with | None -> "" | Some s -> s
 let _big_node_2_node config index (ctrl:Bigraph.Ctrl.t) =
     let ctrl_str = Bigraph.Ctrl.name ctrl in
@@ -18,25 +18,76 @@ let _big_link_2_edge ~from_idx ~to_idx arrows =
 let _place_graph_2_edges bigraph = 
     Bigraph.Sparse.fold (fun from_idx to_idx res -> _big_link_2_edge ~from_idx ~to_idx "to" :: res) bigraph.Bigraph.Big.p.nn []
 let _link_graph_edge_2_edge edge =
-    Bigraph.Link.Ports.fold (fun from_idx to_idx res -> _big_link_2_edge ~from_idx ~to_idx "" :: res ) edge.Bigraph.Link.p []
+    Bigraph.Link.Ports.fold 
+        (
+            fun from_idx to_idx res -> _big_link_2_edge ~from_idx ~to_idx "" :: res 
+        ) 
+        edge.Bigraph.Link.p 
+        []
+let hyperedge_node_tag = "!@#HYPEREDGE!@#"
+let _hyper_edge_2_node config node_id =
+    let color = Hashtbl.find_opt config.control2color hyperedge_node_tag |> _default_string_fun
+    and shape = Hashtbl.find_opt config.control2shape hyperedge_node_tag |> _default_string_fun in
+    {id=node_id;label="";color;shape}
+let _link_graph_edge_2_edges_and_node config edge ~max_node_id =
+    let num_of_connections = Bigraph.Link.Ports.cardinal edge.Bigraph.Link.p in
+    let res_edgs =
+        if num_of_connections > 2 then (* many-many *)
+            Bigraph.Link.Ports.fold 
+            (fun from_idx _ res_edgs -> (_big_link_2_edge ~from_idx ~to_idx:(max_node_id+1) "")::res_edgs) 
+            edge.Bigraph.Link.p
+            []
+            else (* 1-1 connection *)
+                let nodes_to_connect = 
+                    Bigraph.Link.Ports.fold 
+                    (fun from_idx _ res -> from_idx::res )
+                    edge.Bigraph.Link.p
+                    [] in
+                [_big_link_2_edge ~from_idx:(List.nth nodes_to_connect 0) ~to_idx:(List.nth nodes_to_connect 1) ""]
+    in
+    if num_of_connections > 2 then
+        res_edgs,Some (_hyper_edge_2_node config (max_node_id+1))
+    else
+        res_edgs,None
 let _link_graph_2_edges bigraph =
     Bigraph.Link.Lg.fold (fun edge res -> _link_graph_edge_2_edge edge :: res ) bigraph.Bigraph.Big.l [] |> List.flatten
+let _link_graph_2_nodes_and_edges config bigraph max_node_id =
+    let current_max_node_id = ref max_node_id in
+    let res_edges,res_nodes = 
+        Bigraph.Link.Lg.fold 
+            (
+                fun edge (res_edgs,res_nds) -> 
+                    let edgs,node_opt = _link_graph_edge_2_edges_and_node config edge ~max_node_id:!current_max_node_id in
+                    match node_opt with
+                    | None -> edgs::res_edgs,res_nds
+                    | Some node -> 
+                        current_max_node_id := !current_max_node_id+1;
+                        edgs::res_edgs,node::res_nds            
+            ) 
+            bigraph.Bigraph.Big.l 
+            ([],[])
+    in
+    (List.flatten res_edges),res_nodes 
 let _state_2_edges bigraph =
     let edges_from_place_graph = _place_graph_2_edges bigraph
     and edges_from_link_graph = _link_graph_2_edges bigraph in
     List.append edges_from_place_graph edges_from_link_graph
+let _state_2_edges_and_nodes config bigraph max_node_id =
+    let edges_from_place_graph = _place_graph_2_edges bigraph
+    and edges_from_link_graph,nodes_from_link_graph = _link_graph_2_nodes_and_edges config bigraph max_node_id in
+    List.append edges_from_place_graph edges_from_link_graph,nodes_from_link_graph
 let bigraph_2_network config bigraph = 
-    let nodes = _state_2_nodes config bigraph
-    and edges = _state_2_edges bigraph in
-    {nodes;edges}
-let network_to_json = [%yojson_of: network_data]
+    let nodes = _state_2_nodes config bigraph in
+    let edges,nodes2 = _state_2_edges_and_nodes config bigraph ((List.length nodes)-1) in
+    {nodes=nodes@nodes2;edges}
+let _network_to_json = [%yojson_of: network_data]
 let _save_to_file ~filename ~content =
     let oc = open_out filename in (* create or truncate file, return channel *)
         Printf.fprintf oc "%s\n" content; (* write something *)   
     close_out oc 
 let transformer_save_state_as_network config (part_res_cs,_) current_result = 
-    let filename = config.file_prefix ^ "_state_T-"^(string_of_int part_res_cs.Phase3.time) 
+    let filename = config.file_prefix^"\\"^config.file_prefix^"state_T-"^(string_of_int part_res_cs.Phase3.time) 
     and content_raw = bigraph_2_network config part_res_cs.state.bigraph in
-    let content = network_to_json content_raw |> string_of_yojson in
+    let content = _network_to_json content_raw |> string_of_yojson in
     _save_to_file ~filename ~content;
     current_result
