@@ -1,10 +1,10 @@
-type state_serialization_config = {file_prefix:string; control2shape:(string,string)Hashtbl.t; control2color:(string,string) Hashtbl.t}
+type state_serialization_config = {directory:string;file_prefix:string; control2shape:(string,string)Hashtbl.t; control2color:(string,string) Hashtbl.t}
 type node = {id:int;label:string;shape:string;color:string}
-[@@deriving yojson_of, show]
+[@@deriving yojson, show]
 type edge = { from: int; to_:int[@key "to"]; arrows: string }
-[@@deriving yojson_of, show]
+[@@deriving yojson, show]
 type network_data = { nodes : node list; edges:edge list}
-[@@deriving yojson_of, show]
+[@@deriving yojson, show]
 let _default_string_fun = fun str_opt -> match str_opt with | None -> "" | Some s -> s
 let _big_node_2_node config index (ctrl:Bigraph.Ctrl.t) =
     let ctrl_str = Bigraph.Ctrl.name ctrl in
@@ -81,13 +81,26 @@ let bigraph_2_network config bigraph =
     let edges,nodes2 = _state_2_edges_and_nodes config bigraph ((List.length nodes)-1) in
     {nodes=nodes@nodes2;edges}
 let _network_to_json = [%yojson_of: network_data]
-let _save_to_file ~filename ~content =
-    let oc = open_out filename in (* create or truncate file, return channel *)
-        Printf.fprintf oc "%s\n" content; (* write something *)   
-    close_out oc 
-let transformer_save_state_as_network config (part_res_cs,_) current_result = 
-    let filename = config.file_prefix^"\\"^config.file_prefix^"state_T-"^(string_of_int part_res_cs.Phase3.time) 
-    and content_raw = bigraph_2_network config part_res_cs.state.bigraph in
-    let content = _network_to_json content_raw |> string_of_yojson in
-    _save_to_file ~filename ~content;
+type state_serialized_raw = {sat_config:Ssp.Template_state.t;network:network_data;ui_map:Ui.map}
+type state_serialized = {sat_config:(int*int)array;network_data:string[@key "network_data_file"];ui_map:string}
+[@@deriving yojson, show]
+let network_filename config time_moment =
+    config.directory^"\\"^config.file_prefix^"-network-T:"^(string_of_int time_moment)^".json"
+let state_serialized_filename config time_moment = 
+    config.directory^"\\"^config.file_prefix^"-state-T:"^(string_of_int time_moment)^".json"
+let _raw_2_exported (ssr:state_serialized_raw) (config:state_serialization_config) time_moment =
+    let network_filename = network_filename config time_moment in
+        {sat_config = ssr.sat_config;network_data=network_filename;ui_map=Ui.map_to_string ssr.ui_map}
+let _make_ssr sat net uim =
+    {network=net;sat_config=sat;ui_map=uim}
+let transformer_save_state config (part_res_cs,_) current_result = 
+    let filename = state_serialized_filename config part_res_cs.Phase3.time 
+    and network_filename = network_filename config part_res_cs.Phase3.time 
+    and network = bigraph_2_network config part_res_cs.state.bigraph in
+    let content_raw = _make_ssr part_res_cs.sat_config network part_res_cs.ui_map in
+    let network_json = [%yojson_of: network_data] network 
+    and content_json = (_raw_2_exported content_raw config part_res_cs.time) |> [%yojson_of: state_serialized]  in
+    Yojson.Safe.to_file filename content_json;
+    Yojson.Safe.to_file network_filename network_json ;
     current_result
+let tj = [%yojson_of: network_data] 
