@@ -103,7 +103,6 @@ let transformer_save_state config (part_res_cs,_) current_result =
     Yojson.Safe.to_file filename content_json;
     Yojson.Safe.to_file network_filename network_json ;
     current_result
-let tj = [%yojson_of: network_data]
 type _style = {color:string; background_color:string;}
 let _style_2_string style = "{color:"^style.color^"; background-color:"^style.background_color^";}"
 type _timeline_item_raw = { start_time: int; end_time: int; object_name: string; style:_style; object_id:int}
