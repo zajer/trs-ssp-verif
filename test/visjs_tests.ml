@@ -100,12 +100,80 @@ let test_save_state_as_network ctx =
         ~printer:[%show: Visjs.network_data]
         network
         saved_network
+let _cmp_timeline_items tl1i tl2i =
+    tl1i.Visjs.start_time = tl2i.Visjs.start_time && tl1i.end_time = tl2i.end_time && tl1i.content = tl2i.content && tl1i.group = tl2i.group
+let _cmp_groups g1 g2 =
+    g1.Visjs.id = g2.Visjs.id
+let test_save_timeline_1 ctx = 
+    let tmp_dir_name = bracket_tmpdir ctx in
+    let config = {Visjs.directory=tmp_dir_name;name="test_timeline";known_objects=Common.IntSet.empty;current_timeline=[];} in
+    let time_info_1 = {Phase3.participants=[1;2;3]; react_label="r1"; transition_idx=3; new_objs=[]; term_objs=[]; start_time=3; end_time=4}
+    and time_info_2 = {Phase3.participants=[2;4]; react_label="r2"; transition_idx=4; new_objs=[1]; term_objs=[5]; start_time=4; end_time=5} in
+    let input_result = {Phase1.is_successful=true;value=[],[];error_message=None} 
+    and input_state = {Phase3.state={Tracking_bigraph.TTS.bigraph=Bigraph.Big.zero;index=777};ui_map=Ui.empty_map;sat_config=[||];time=789} 
+    and input_time_infos = [time_info_1;time_info_2] in
+    let result = Visjs.transformer_save_timeline config (input_state,input_time_infos) input_result 
+    and expected_result = input_result
+    and expected_timeline = Visjs.time_infos_2_timeline [time_info_1;time_info_2]
+    and expected_groups = Visjs.set_of_participants_2_groups (Common.IntSet.of_list [1;2;3;4]) in
+    let result_timeline = Yojson.Safe.from_file (Visjs.timeline_filename config) |> [%of_yojson: Visjs.timeline]
+    and result_groups = Yojson.Safe.from_file (Visjs.groups_filename config) |> [%of_yojson: Visjs.group list] in
+    assert_equal
+        ~msg:"Result should not be altered"
+        expected_result
+        result;
+    assert_equal
+        ~msg:"Saved timeline is not equal to expected"
+        ~printer:[%show: Visjs.timeline]
+        ~cmp:(fun tl1 tl2 -> List.for_all2 (fun tl1i tl2i -> _cmp_timeline_items tl1i tl2i ) tl1 tl2 )
+        expected_timeline
+        result_timeline;
+    assert_equal
+        ~msg:"Saved groups are not equal to expected"
+        ~printer:[%show: Visjs.group list]
+        ~cmp:(fun gs1 gs2 -> List.for_all2 (fun g1 g2 -> _cmp_groups g1 g2) gs1 gs2)
+        expected_groups
+        result_groups;
+    assert_equal
+        ~msg:"Known objects in config are not equal to expected"
+        ~cmp:Common.IntSet.equal
+        (Common.IntSet.of_list [1;2;3;4] )
+        config.known_objects
+let test_save_timeline_2 ctx = 
+    let tmp_dir_name = bracket_tmpdir ctx in
+    let time_info_new = {Phase3.participants=[1;2;3]; react_label="r1"; transition_idx=3; new_objs=[]; term_objs=[]; start_time=3; end_time=4}
+    and time_info_old = {Phase3.participants=[4]; react_label="r2"; transition_idx=4; new_objs=[1]; term_objs=[5]; start_time=4; end_time=5} in
+    let input_result = {Phase1.is_successful=true;value=[],[];error_message=None} 
+    and input_state = {Phase3.state={Tracking_bigraph.TTS.bigraph=Bigraph.Big.zero;index=777};ui_map=Ui.empty_map;sat_config=[||];time=789} 
+    and current_timeline = [time_info_old] |> Visjs.time_infos_2_timeline
+    and input_time_infos = [time_info_new] in
+    let config = {Visjs.directory=tmp_dir_name;name="test_timeline";known_objects=Common.IntSet.of_list [1;2;3;4];current_timeline;} in
+    let result = Visjs.transformer_save_timeline config (input_state,input_time_infos) input_result 
+    and expected_result = input_result
+    and expected_timeline = Visjs.time_infos_2_timeline [time_info_new;time_info_old] in
+    let result_timeline = Yojson.Safe.from_file (Visjs.timeline_filename config) |> [%of_yojson: Visjs.timeline] in
+    assert_equal
+        ~msg:"Result should not be altered"
+        expected_result
+        result;
+    assert_equal
+        ~msg:"Saved timeline is not equal to expected"
+        ~printer:[%show: Visjs.timeline]
+        ~cmp:(fun tl1 tl2 -> List.for_all2 (fun tl1i tl2i -> _cmp_timeline_items tl1i tl2i ) tl1 tl2 )
+        expected_timeline
+        result_timeline;
+    assert_equal
+        ~msg:"There should be no file with groups"
+        false
+        (Sys.file_exists (Visjs.groups_filename config))
 let suite =
     "Visjs" >::: [
         "State conversion test 1">:: test_constructed_state_2_network_1;
         "State conversion test 2">:: test_constructed_state_2_network_2;
         "State conversion test 3">:: test_constructed_state_2_network_3;
         "Saving state">:: test_save_state_as_network;
+        "Saving timeline 1">:: test_save_timeline_1;
+        "Saving timeline 2 - some groups and timeline items are already saved">:: test_save_timeline_2;
     ]
 
 let () =

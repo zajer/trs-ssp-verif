@@ -103,4 +103,60 @@ let transformer_save_state config (part_res_cs,_) current_result =
     Yojson.Safe.to_file filename content_json;
     Yojson.Safe.to_file network_filename network_json ;
     current_result
-let tj = [%yojson_of: network_data] 
+let tj = [%yojson_of: network_data]
+type _style = {color:string; background_color:string;}
+let _style_2_string style = "{color:"^style.color^"; background-color:"^style.background_color^";}"
+type _timeline_item_raw = { start_time: int; end_time: int; object_name: string; style:_style; object_id:int}
+type timeline_item = { start_time: int[@key "start"]; end_time: int[@key "end"]; content: string; style:string; group:int}
+[@@deriving yojson, show]
+type timeline = timeline_item list
+[@@deriving yojson, show]
+type timeline_config = {directory:string;name:string;mutable known_objects:Common.IntSet.t;mutable current_timeline:timeline;}
+type group = {id:int;content:string}
+[@@deriving yojson, show]
+let _conv_raw_timeline (ti:_timeline_item_raw) = {start_time=ti.start_time; end_time=ti.end_time; content=ti.object_name; style=_style_2_string ti.style; group=ti.object_id}
+let timeline_filename (config:timeline_config) = 
+    config.directory^"\\"^config.name^"-timeline.json"
+let _save_timeline config tl = 
+    let tl_json = [%yojson_of: timeline] tl in
+    Yojson.Safe.to_file (timeline_filename config) tl_json
+let set_of_participants_2_groups sop = 
+    Common.IntSet.fold (fun participant_id res -> {id=participant_id;content=(string_of_int participant_id)}::res) sop []
+let groups_filename (config:timeline_config) = 
+    config.directory^"\\"^config.name^"-groups.json"
+let _save_groups config gs =
+    let gs_json = [%yojson_of: group list] gs in
+    Yojson.Safe.to_file (groups_filename config) gs_json
+let _time_info_2_participating_objects_set ti =
+    List.fold_left (fun res object_id -> Common.IntSet.add object_id res)
+    Common.IntSet.empty
+    ti.Phase3.participants
+let _gen_style () : _style =
+    let hue = Random.int 360 in
+    {color="white";background_color="hsl("^(string_of_int hue)^", 75%, 50%)"}
+let _time_info_2_raw_timeline_items (ti:Phase3.time_info) =
+    let style = _gen_style () in
+    List.map 
+    (
+        fun object_id -> 
+            {start_time=ti.start_time; end_time=ti.end_time; object_name=string_of_int object_id; style; object_id;}    
+    )
+    ti.Phase3.participants
+let time_infos_2_timeline tis = 
+    List.map (fun ti -> _time_info_2_raw_timeline_items ti ) tis |> List.flatten |> List.map (fun tir -> _conv_raw_timeline tir)
+let transformer_save_timeline config (_,time_infos) current_result =
+    let new_timeline_items = time_infos_2_timeline time_infos
+    and currently_participating_objects = 
+        List.fold_left 
+        (fun res ti -> Common.IntSet.union res (_time_info_2_participating_objects_set ti) ) 
+        Common.IntSet.empty 
+        time_infos in
+    let full_timeline = List.append new_timeline_items config.current_timeline 
+    and are_groups_extended = not (Common.IntSet.subset currently_participating_objects config.known_objects) in
+    (if are_groups_extended then 
+        let groups = set_of_participants_2_groups (Common.IntSet.union config.known_objects currently_participating_objects) in
+        config.known_objects <- (Common.IntSet.union currently_participating_objects config.known_objects);
+        _save_groups config groups
+    );
+    _save_timeline config full_timeline;
+    current_result
