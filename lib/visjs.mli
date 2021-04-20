@@ -2,7 +2,6 @@ type state_serialization_config = {directory:string;file_prefix:string; control2
 type node = {id:int;label:string;shape:string;color:string} [@@deriving yojson, show]
 type edge = { from: int; to_:int[@key "to"]; arrows: string } [@@deriving yojson, show]
 type network_data = { nodes : node list; edges:edge list} [@@deriving yojson, show]
-type state_serialized_raw = {sat_config:Ssp.Template_state.t;network:network_data;ui_map:Ui.map}
 type state_serialized = {sat_config:(int*int)array;network_data:string[@key "network_data_file"];ui_map:string} [@@deriving yojson, show]
 type timeline_item = { start_time: int[@key "start"]; end_time: int[@key "end"]; content: string; style:string; group:int} [@@deriving yojson, show]
 type timeline = timeline_item list [@@deriving yojson, show]
