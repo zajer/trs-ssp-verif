@@ -163,6 +163,12 @@ let test_save_timeline_2 ctx =
         expected_timeline
         result_timeline;
     assert_equal
+        ~msg:"Timeline kept in config is not equal to expected"
+        ~printer:[%show: Visjs.timeline]
+        ~cmp:(fun tl1 tl2 -> List.for_all2 (fun tl1i tl2i -> _cmp_timeline_items tl1i tl2i ) tl1 tl2 )
+        expected_timeline
+        config.current_timeline;
+    assert_equal
         ~msg:"There should be no file with groups"
         false
         (Sys.file_exists (Visjs.groups_filename config))
