@@ -11,6 +11,7 @@ val hyperedge_node_tag : string
 val bigraph_2_network : state_serialization_config -> Bigraph.Big.t -> network_data
 val network_filename : state_serialization_config -> int -> string
 val state_serialized_filename : state_serialization_config -> int -> string
+val state_serialized_filename_regex : state_serialization_config -> string
 val transformer_save_state : state_serialization_config -> Phase1.ResultTransformer.t -> Phase1.result -> Phase1.result 
 val timeline_filename : timeline_config -> string
 val set_of_participants_2_groups : Common.IntSet.t -> group list

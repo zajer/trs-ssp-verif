@@ -85,9 +85,17 @@ type state_serialized_raw = {sat_config:Ssp.Template_state.t;network:network_dat
 type state_serialized = {sat_config:(int*int)array;network_data:string[@key "network_data_file"];ui_map:string}
 [@@deriving yojson, show]
 let network_filename config time_moment =
-    config.directory^"\\"^config.file_prefix^"-network-T:"^(string_of_int time_moment)^".json"
-let state_serialized_filename config time_moment = 
-    config.directory^"\\"^config.file_prefix^"-state-T:"^(string_of_int time_moment)^".json"
+     if config.directory <> "" then
+        config.directory^"\\"^config.file_prefix^"-network-T:"^(string_of_int time_moment)^".json"
+    else
+        config.file_prefix^"-network-T:"^(string_of_int time_moment)^".json"
+let state_serialized_filename config time_moment =
+    if config.directory <> "" then
+        config.directory^"\\"^config.file_prefix^"-state-T:"^(string_of_int time_moment)^".json"
+    else
+        config.file_prefix^"-state-T:"^(string_of_int time_moment)^".json"
+let state_serialized_filename_regex config =
+    config.file_prefix^"-state-T:[0-9]+.json"
 let _raw_2_exported (ssr:state_serialized_raw) (config:state_serialization_config) time_moment =
     let network_filename = network_filename config time_moment in
         {sat_config = ssr.sat_config;network_data=network_filename;ui_map=Ui.map_to_string ssr.ui_map}
@@ -115,14 +123,20 @@ type group = {id:int;content:string}
 [@@deriving yojson, show]
 let _conv_raw_timeline (ti:_timeline_item_raw) = {start_time=ti.start_time; end_time=ti.end_time; content=ti.object_name; style=_style_2_string ti.style; group=ti.object_id}
 let timeline_filename (config:timeline_config) = 
-    config.directory^"\\"^config.name^"-timeline.json"
+    if config.directory <> "" then
+        config.directory^"\\"^config.name^"-timeline.json"
+    else
+        config.name^"-timeline.json"
 let _save_timeline config tl = 
     let tl_json = [%yojson_of: timeline] tl in
     Yojson.Safe.to_file (timeline_filename config) tl_json
 let set_of_participants_2_groups sop = 
     Common.IntSet.fold (fun participant_id res -> {id=participant_id;content=(string_of_int participant_id)}::res) sop []
 let groups_filename (config:timeline_config) = 
-    config.directory^"\\"^config.name^"-groups.json"
+    if config.directory <> "" then
+        config.directory^"\\"^config.name^"-groups.json"
+    else
+        config.name^"-groups.json"
 let _save_groups config gs =
     let gs_json = [%yojson_of: group list] gs in
     Yojson.Safe.to_file (groups_filename config) gs_json
@@ -157,5 +171,6 @@ let transformer_save_timeline config (_,time_infos) current_result =
         config.known_objects <- (Common.IntSet.union currently_participating_objects config.known_objects);
         _save_groups config groups
     );
+    config.current_timeline <- full_timeline;
     _save_timeline config full_timeline;
     current_result
