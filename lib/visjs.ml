@@ -86,12 +86,12 @@ type state_serialized = {sat_config:(int*int)array;network_data:string[@key "net
 [@@deriving yojson, show]
 let network_filename config time_moment =
      if config.directory <> "" then
-        config.directory^"\\"^config.file_prefix^"-network-T:"^(string_of_int time_moment)^".json"
+        config.directory^"//"^config.file_prefix^"-network-T:"^(string_of_int time_moment)^".json"
     else
         config.file_prefix^"-network-T:"^(string_of_int time_moment)^".json"
 let state_serialized_filename config time_moment =
     if config.directory <> "" then
-        config.directory^"\\"^config.file_prefix^"-state-T:"^(string_of_int time_moment)^".json"
+        config.directory^"//"^config.file_prefix^"-state-T:"^(string_of_int time_moment)^".json"
     else
         config.file_prefix^"-state-T:"^(string_of_int time_moment)^".json"
 let state_serialized_filename_regex config =
@@ -124,7 +124,7 @@ type group = {id:int;content:string}
 let _conv_raw_timeline (ti:_timeline_item_raw) = {start_time=ti.start_time; end_time=ti.end_time; content=ti.object_name; style=_style_2_string ti.style; group=ti.object_id}
 let timeline_filename (config:timeline_config) = 
     if config.directory <> "" then
-        config.directory^"\\"^config.name^"-timeline.json"
+        config.directory^"//"^config.name^"-timeline.json"
     else
         config.name^"-timeline.json"
 let _save_timeline config tl = 
@@ -134,7 +134,7 @@ let set_of_participants_2_groups sop =
     Common.IntSet.fold (fun participant_id res -> {id=participant_id;content=(string_of_int participant_id)}::res) sop []
 let groups_filename (config:timeline_config) = 
     if config.directory <> "" then
-        config.directory^"\\"^config.name^"-groups.json"
+        config.directory^"//"^config.name^"-groups.json"
     else
         config.name^"-groups.json"
 let _save_groups config gs =
