@@ -24,7 +24,7 @@ let _link_graph_edge_2_edge edge =
         ) 
         edge.Bigraph.Link.p 
         []
-let hyperedge_node_tag = "!@#HYPEREDGE!@#"
+let hyperedge_node_tag = "hyperedge"
 let _hyper_edge_2_node config node_id =
     let color = Hashtbl.find_opt config.control2color hyperedge_node_tag |> _default_string_fun
     and shape = Hashtbl.find_opt config.control2shape hyperedge_node_tag |> _default_string_fun in
