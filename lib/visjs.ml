@@ -152,7 +152,7 @@ let _time_info_2_raw_timeline_items (ti:Phase3.time_info) =
     List.map 
     (
         fun object_id -> 
-            {start_time=ti.start_time; end_time=ti.end_time; object_name=string_of_int object_id; style; object_id;}    
+            {start_time=ti.start_time; end_time=ti.end_time; object_name=ti.react_label; style; object_id;}    
     )
     ti.Phase3.participants
 let time_infos_2_timeline tis = 
