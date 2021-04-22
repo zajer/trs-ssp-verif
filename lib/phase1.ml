@@ -1,4 +1,5 @@
 type result = {is_successful:bool; value:Phase3.constructed_state list * Phase3.time_info list; error_message:string option}
+type output = {mutable is_scenario_valid:bool;message:string option;directory:string;timeline_filename:string; groups_filename:string; states_regex:string} [@@deriving yojson_of]
 type _construciton_params = 
     {
         current_state:Phase3.constructed_state;
@@ -9,6 +10,10 @@ type _construciton_params =
         all_trans_by_idx:Phase3.trans_mapped_by_idx;
         all_trans_by_key:Phase4.trans_mapped_by_key;
     }
+let output_filename name = 
+    name^"_trs-ssp-output.json"
+let output_files_regex _ = 
+    ".+_trs-ssp-output.json"
 module ResultTransformer = struct
     type t = Phase3.constructed_state * (Phase3.time_info list)
     type o = t -> result -> result
@@ -39,6 +44,10 @@ module BasicTransformers = struct
         match _does_any_action_end_after_moment time_infos max_time with
         | false -> current_result
         | true -> {is_successful=false; value=current_result.value;error_message=Some ("At least one of the actions in the scenario ends after moment:"^(string_of_int max_time))}
+    let save_or_update_output current_output name _ current_result =
+        current_output.is_scenario_valid <- current_result.is_successful;
+        Yojson.Safe.to_file name ([%yojson_of: output] current_output);
+        current_result
 end
 let _update_result_value res new_val = 
     {is_successful=res.is_successful;value=new_val;error_message=res.error_message}
