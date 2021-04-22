@@ -105,7 +105,7 @@ let _initial_state ~first_raw_walk_element ~num_of_agents all_states_by_idx =
         time=0
     }
 let _construct_result ~initial_state ~num_of_agents ~whole_ewalk all_states_by_idx all_trans_by_idx all_trans_by_key operation =
-    let initial_result = _initial_result 
+    let initial_result = _initial_result initial_state
     and initial_params = 
         {
             current_state=initial_state;
@@ -116,7 +116,8 @@ let _construct_result ~initial_state ~num_of_agents ~whole_ewalk all_states_by_i
             all_trans_by_idx;
             all_trans_by_key
         } in
-    _proceed_with_construction_of_result (initial_result initial_state) initial_params operation
+    let initial_result_transformed = (ResultTransformer.apply (initial_state,[]) initial_result operation) in 
+    _proceed_with_construction_of_result initial_result_transformed initial_params operation
 let _invert_order_of_constructed_states res =
     match res.value with
     | (vsl,vtil) -> ((List.rev vsl), vtil) |> _update_result_value res
