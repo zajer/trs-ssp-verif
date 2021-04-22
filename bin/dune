@@ -1,0 +1,5 @@
+(executable
+  (name verify_visjs)
+  (preprocess (pps ppx_yojson_conv))
+  (libraries bigraph tracking_bigraph ssp ssp_bridge ssp_verification )
+)
