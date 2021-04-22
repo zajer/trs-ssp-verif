@@ -13,15 +13,15 @@ let agents_update sat_config time_change =
 let agents_in_future state current_moment = 
     State_space.elements_in_future state current_moment
 type time_info = {participants:int list; react_label:string; transition_idx:int; new_objs: int list; term_objs:int list; start_time:int; end_time:int}
-let extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui2redex ~constructed_moment_of_time ~duration_of_transition ~transition_idx react_label =
+let extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui2redex ~start_time ~duration_of_transition ~transition_idx react_label =
     let new_objs = Ui.UIMappingsSet.diff ui2state_after_transition ui2state_before_transition |> Ui.domain
     and term_objs = Ui.UIMappingsSet.diff ui2state_before_transition ui2state_after_transition |> Ui.domain in
     {
         participants=Ui.domain ui2redex;
         react_label;
         transition_idx;
-        start_time=constructed_moment_of_time;
-        end_time=constructed_moment_of_time+duration_of_transition;
+        start_time;
+        end_time=start_time+duration_of_transition;
         new_objs;
         term_objs
     }
@@ -99,7 +99,7 @@ let rec _construct_state
                                     ~ui2state_before_transition:state_currently_constructed.ui_map
                                     ~ui2state_after_transition:new_constructed_semi_state.ui_map
                                     ~ui2redex:h.ui2redex 
-                                    ~constructed_moment_of_time:time_moment 
+                                    ~start_time:(time_moment-1)
                                     ~duration_of_transition:time_needed
                                     ~transition_idx:h.trans_fun.transition_idx
                                     trans_to_be_applied.react_label in

@@ -15,11 +15,11 @@ let test_extract_time_info_1 _ =
     let ui2state_before_transition = [(0,0);(1,1);(2,2)] |> Ui.make_map_of_list
     and ui2state_after_transition = [(0,2);(1,0);(2,1)] |> Ui.make_map_of_list
     and ui2redex = [(0,0);(2,2)] |> Ui.make_map_of_list
-    and constructed_moment_of_time = 777
+    and start_time = 777
     and duration_of_transition = 21
     and transition_idx = 7
     and react_label = "my react" in
-    let result = Phase3.extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui2redex ~constructed_moment_of_time ~duration_of_transition ~transition_idx react_label 
+    let result = Phase3.extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui2redex ~start_time ~duration_of_transition ~transition_idx react_label 
     and expected_result = {Phase3.participants=[0;2] ; react_label; transition_idx; new_objs=[]; term_objs=[]; start_time=777; end_time=798} in
     assert_equal
         ~msg:"Result time info is not equal to expected"
@@ -30,11 +30,11 @@ let test_extract_time_info_2 _ =
     let ui2state_before_transition = [(0,0);(1,1);(2,2)] |> Ui.make_map_of_list
     and ui2state_after_transition = [(0,2);(1,0);(2,3);(3,1)] |> Ui.make_map_of_list
     and ui2redex = [(0,0);(2,2)] |> Ui.make_map_of_list
-    and constructed_moment_of_time = 777
+    and start_time = 777
     and duration_of_transition = 21
     and transition_idx = 7
     and react_label = "my react" in
-    let result = Phase3.extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui2redex ~constructed_moment_of_time ~duration_of_transition ~transition_idx react_label 
+    let result = Phase3.extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui2redex ~start_time ~duration_of_transition ~transition_idx react_label 
     and expected_result = {Phase3.participants=[0;2] ; react_label; transition_idx; new_objs=[3]; term_objs=[]; start_time=777; end_time=798} in
     assert_equal
         ~msg:"Result time info is not equal to expected"
@@ -45,11 +45,11 @@ let test_extract_time_info_3 _ =
     let ui2state_before_transition = [(0,0);(1,1);(2,2)] |> Ui.make_map_of_list
     and ui2state_after_transition = [(0,1);(2,0)] |> Ui.make_map_of_list
     and ui2redex = [(0,0);(2,2)] |> Ui.make_map_of_list
-    and constructed_moment_of_time = 777
+    and start_time = 777
     and duration_of_transition = 21
     and transition_idx = 7
     and react_label = "my react" in
-    let result = Phase3.extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui2redex ~constructed_moment_of_time ~duration_of_transition ~transition_idx react_label 
+    let result = Phase3.extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui2redex ~start_time ~duration_of_transition ~transition_idx react_label 
     and expected_result = {Phase3.participants=[0;2] ; react_label; transition_idx; new_objs=[]; term_objs=[1]; start_time=777; end_time=798} in
     assert_equal
         ~msg:"Result time info is not equal to expected"
@@ -60,11 +60,11 @@ let test_extract_time_info_4 _ =
     let ui2state_before_transition = [(0,0);(1,1);(2,2)] |> Ui.make_map_of_list
     and ui2state_after_transition = [(0,1);(3,0);(2,2)] |> Ui.make_map_of_list
     and ui2redex = [(0,0);(2,2)] |> Ui.make_map_of_list
-    and constructed_moment_of_time = 777
+    and start_time = 777
     and duration_of_transition = 21
     and transition_idx = 7
     and react_label = "my react" in
-    let result = Phase3.extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui2redex ~constructed_moment_of_time ~duration_of_transition ~transition_idx react_label 
+    let result = Phase3.extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui2redex ~start_time ~duration_of_transition ~transition_idx react_label 
     and expected_result = {Phase3.participants=[0;2] ; react_label; transition_idx; new_objs=[3]; term_objs=[1]; start_time=777; end_time=798} in
     assert_equal
         ~msg:"Result time info is not equal to expected"
@@ -80,6 +80,7 @@ let _compare_ewalks ew1 ew2 =
         ) ew1 ew2
     else
         false
+let _tinfo_list2string = (fun til -> let res = List.map (fun ti -> _tinfo2string ti) til |> String.concat ";\n\t" in "\n[\n\t"^res^"\n]")
 let test_perform_phase_1 _ =
     let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2)] |> Ui.make_map_of_list 
@@ -91,7 +92,7 @@ let test_perform_phase_1 _ =
     and all_trans_by_idx = Phase3_tests_data.phase_test_one_agent_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_one_agent_all_trans_by_keys in
     let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config;time=constructed_time_moment-1} in
-    let result_state,unused_ewalk,_ = Phase3.perform_phase
+    let result_state,unused_ewalk,result_time_infos = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
                     ~constructed_time_moment
@@ -102,7 +103,8 @@ let test_perform_phase_1 _ =
     and expected_unused_walk = []
     and expected_result_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_output_state;Tracking_bigraph.TTS.index=1}
     and expected_state_mapping = [(1,0);(2,1);(3,2)] |> Ui.make_map_of_list
-    and expected_result_sat = [|(1,1)|] in
+    and expected_result_sat = [|(1,1)|]
+    and expected_time_infos = [{Phase3.participants=[1]; react_label="PT-1A-R1"; transition_idx=1; new_objs=[]; term_objs=[]; start_time=0; end_time=1}] in
     assert_equal
         ~msg:"There should be no unused walk elements as the result"
         ~cmp:_compare_ewalks
@@ -127,7 +129,12 @@ let test_perform_phase_1 _ =
     assert_equal
         ~msg:"Result state's time moment is not equal to expected"
         constructed_time_moment
-        result_state.time
+        result_state.time;
+    assert_equal
+        ~msg:"Result time infos are not equal to expected"
+        ~printer:_tinfo_list2string
+        expected_time_infos
+        result_time_infos
 let test_perform_phase_2 _ =
     let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2)] |> Ui.make_map_of_list 
@@ -139,7 +146,7 @@ let test_perform_phase_2 _ =
     and all_trans_by_idx = Phase3_tests_data.phase_test_one_agent_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_one_agent_all_trans_by_keys in
     let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config;time=constructed_time_moment-1} in
-    let result_state,unused_ewalk,_ = Phase3.perform_phase
+    let result_state,unused_ewalk,result_time_infos = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
                     ~constructed_time_moment
@@ -150,7 +157,8 @@ let test_perform_phase_2 _ =
     and expected_unused_walk = ewalk
     and expected_result_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;Tracking_bigraph.TTS.index=0}
     and expected_state_mapping = [(1,0);(2,1);(3,2)] |> Ui.make_map_of_list
-    and expected_result_sat = [|(1,1)|] in
+    and expected_result_sat = [|(1,1)|] 
+    and expected_time_infos = [] in
     assert_equal
         ~msg:"There should be one unused walk element as the result"
         ~cmp:_compare_ewalks
@@ -175,9 +183,14 @@ let test_perform_phase_2 _ =
     assert_equal
         ~msg:"Result state's time moment is not equal to expected"
         constructed_time_moment
-        result_state.time
+        result_state.time;
+    assert_equal
+        ~msg:"Result time infos are not equal to expected"
+        ~printer:_tinfo_list2string
+        expected_time_infos
+        result_time_infos
 let test_perform_phase_3 _ =
-    let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
+    let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_two_agents_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
     and previous_sat_config = [|(1,0);(2,0)|]
     and ewalk = Phase3_tests_data.phase_test_two_agents_ewalk_1 
@@ -187,7 +200,7 @@ let test_perform_phase_3 _ =
     and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
     let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config;time=constructed_time_moment-1} in
-    let result_state,unused_ewalk,_ = Phase3.perform_phase
+    let result_state,unused_ewalk,result_time_infos = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
                     ~constructed_time_moment
@@ -198,7 +211,12 @@ let test_perform_phase_3 _ =
     and expected_unused_walk = []
     and expected_result_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_two_agents_output_state;Tracking_bigraph.TTS.index=2}
     and expected_state_mapping = [(2,0);(1,1);(3,2);(4,3)] |> Ui.make_map_of_list
-    and expected_result_sat = [|(1,1);(2,1)|] in
+    and expected_result_sat = [|(1,1);(2,1)|] 
+    and expected_time_infos = 
+        [
+            {Phase3.participants=[1;3;4]; react_label="PT-2A-R1"; transition_idx=3; new_objs=[]; term_objs=[]; start_time=0; end_time=1};
+            {Phase3.participants=[2;3;4]; react_label="PT-2A-R1"; transition_idx=2; new_objs=[]; term_objs=[]; start_time=0; end_time=1}
+        ] in
     assert_equal
         ~msg:"There should be no unused walk element as the result"
         ~cmp:_compare_ewalks
@@ -224,9 +242,14 @@ let test_perform_phase_3 _ =
     assert_equal
         ~msg:"Result state's time moment is not equal to expected"
         constructed_time_moment
-        result_state.time
+        result_state.time;
+    assert_equal
+        ~msg:"Result time infos are not equal to expected"
+        ~printer:_tinfo_list2string
+        expected_time_infos
+        result_time_infos
 let test_perform_phase_4 _ =
-    let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
+    let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_two_agents_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
     and previous_sat_config = [|(1,0);(2,0)|]
     and ewalk = Phase3_tests_data.phase_test_two_agents_ewalk_2 
@@ -236,7 +259,7 @@ let test_perform_phase_4 _ =
     and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
     let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config;time=constructed_time_moment-1} in
-    let result_state,unused_ewalk,_ = Phase3.perform_phase
+    let result_state,unused_ewalk,result_time_infos = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
                     ~constructed_time_moment
@@ -247,7 +270,12 @@ let test_perform_phase_4 _ =
     and expected_unused_walk = []
     and expected_result_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_two_agents_output_state;Tracking_bigraph.TTS.index=2}
     and expected_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list
-    and expected_result_sat = [|(1,1);(2,1)|] in
+    and expected_result_sat = [|(1,1);(2,1)|]
+    and expected_time_infos = 
+        [
+            {Phase3.participants=[2;3;4]; react_label="PT-2A-R1"; transition_idx=3; new_objs=[]; term_objs=[]; start_time=0; end_time=1};
+            {Phase3.participants=[1;3;4]; react_label="PT-2A-R1"; transition_idx=1; new_objs=[]; term_objs=[]; start_time=0; end_time=1}
+        ] in
     assert_equal
         ~msg:"There should be no unused walk element as the result"
         ~cmp:_compare_ewalks
@@ -273,9 +301,14 @@ let test_perform_phase_4 _ =
     assert_equal
         ~msg:"Result state's time moment is not equal to expected"
         constructed_time_moment
-        result_state.time
+        result_state.time;
+    assert_equal
+        ~msg:"Result time infos are not equal to expected"
+        ~printer:_tinfo_list2string
+        expected_time_infos
+        result_time_infos
 let test_perform_phase_5 _ =
-    let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_one_agent_previous_state;index=0}
+    let previous_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_two_agents_previous_state;index=0}
     and previous_state_mapping = [(1,0);(2,1);(3,2);(4,3)] |> Ui.make_map_of_list 
     and previous_sat_config = [|(1,1);(2,0)|]
     and ewalk = Phase3_tests_data.phase_test_two_agents_ewalk_2 
@@ -285,7 +318,7 @@ let test_perform_phase_5 _ =
     and all_trans_by_idx = Phase3_tests_data.phase_test_two_agents_all_trans_by_idx
     and all_trans_by_keys = Phase3_tests_data.phase_test_two_agents_all_trans_by_keys () in
     let state_at_previous_moment = {Phase3.state=previous_state;ui_map=previous_state_mapping;sat_config=previous_sat_config;time=constructed_time_moment-1} in
-    let result_state,unused_ewalk,_ = Phase3.perform_phase
+    let result_state,unused_ewalk,result_time_infos = Phase3.perform_phase
                     state_at_previous_moment
                     ewalk
                     ~constructed_time_moment
@@ -303,7 +336,8 @@ let test_perform_phase_5 _ =
         }]
     and expected_result_state = {Tracking_bigraph.TTS.bigraph=Phase3_tests_data.phase_test_two_agents_middle_state;Tracking_bigraph.TTS.index=1}
     and expected_state_mapping = [(1,1);(2,0);(3,2);(4,3)] |> Ui.make_map_of_list
-    and expected_result_sat = [|(1,1);(2,1)|] in
+    and expected_result_sat = [|(1,1);(2,1)|] 
+    and expected_time_infos = [{Phase3.participants=[2;3;4]; react_label="PT-2A-R1"; transition_idx=3; new_objs=[]; term_objs=[]; start_time=0; end_time=1}] in
     assert_equal
         ~msg:"There should be one unused walk element as the result"
         ~cmp:_compare_ewalks
@@ -330,7 +364,12 @@ let test_perform_phase_5 _ =
     assert_equal
         ~msg:"Result state's time moment is not equal to expected"
         constructed_time_moment
-        result_state.time
+        result_state.time;
+    assert_equal
+        ~msg:"Result time infos are not equal to expected"
+        ~printer:_tinfo_list2string
+        expected_time_infos
+        result_time_infos
 let suite =
     "Phase 3" >::: [
         "Extracting time info test 1 - no new or deleted objects">:: test_extract_time_info_1;

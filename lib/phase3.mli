@@ -10,7 +10,7 @@ val extract_time_info :
     ui2state_before_transition:Ui.map ->
     ui2state_after_transition:Ui.map ->
     ui2redex:Ui.map ->
-    constructed_moment_of_time:int ->
+    start_time:int ->
     duration_of_transition:int ->
     transition_idx:int ->
     string ->
