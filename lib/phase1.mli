@@ -1,5 +1,5 @@
 type result = {is_successful:bool; value:Phase3.constructed_state list * Phase3.time_info list; error_message:string option}
-type output = {mutable is_scenario_valid:bool;message:string option;directory:string;timeline_filename:string; groups_filename:string; states_regex:string} [@@deriving yojson_of]
+type output = {mutable is_scenario_valid:bool;mutable message:string option;directory:string;timeline_filename:string; groups_filename:string; states_regex:string} [@@deriving yojson_of]
 val output_filename : string -> string
 val output_files_regex : unit -> string
 module ResultTransformer : sig

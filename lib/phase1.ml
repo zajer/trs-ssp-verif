@@ -1,5 +1,5 @@
 type result = {is_successful:bool; value:Phase3.constructed_state list * Phase3.time_info list; error_message:string option}
-type output = {mutable is_scenario_valid:bool;message:string option;directory:string;timeline_filename:string; groups_filename:string; states_regex:string} [@@deriving yojson_of]
+type output = {mutable is_scenario_valid:bool;mutable message:string option;directory:string;timeline_filename:string; groups_filename:string; states_regex:string} [@@deriving yojson_of]
 type _construciton_params = 
     {
         current_state:Phase3.constructed_state;
@@ -46,6 +46,8 @@ module BasicTransformers = struct
         | true -> {is_successful=false; value=current_result.value;error_message=Some ("At least one of the actions in the scenario ends after moment:"^(string_of_int max_time))}
     let save_or_update_output current_output name _ current_result =
         current_output.is_scenario_valid <- current_result.is_successful;
+        if not current_output.is_scenario_valid then
+            current_output.message <- current_result.error_message ;
         Yojson.Safe.to_file name ([%yojson_of: output] current_output);
         current_result
 end
