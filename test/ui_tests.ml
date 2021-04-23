@@ -63,6 +63,16 @@ let test_if_is_subset_3 _ =
     ~printer:(fun b -> string_of_bool b)
     expected_result
     result
+let test_if_is_subset_4 _ = 
+  let map1 = Ui.make_map_of_list [(1,0);(2,1);(3,2);(4,3)]
+  and map2 = Ui.make_map_of_list [(1,0);(3,2);(4,3)] in
+  let result = Ui.is_subset ~target:map1 ~subset:map2
+  and expected_result = true in
+  assert_equal
+    ~msg:"Provided map should be considered a subset of the target map"
+    ~printer:(fun b -> string_of_bool b)
+    expected_result
+    result
 let suite =
     "Unique Identifiers" >::: [
         "Transform codom test 1">:: test_transform_codom_1;
@@ -71,6 +81,7 @@ let suite =
         "Is subset test 1">:: test_if_is_subset_1;
         "Is subset test 2">:: test_if_is_subset_2;
         "Is subset test 3">:: test_if_is_subset_3;
+        "Is subset test 4">:: test_if_is_subset_4;
     ]
 
 let () =
