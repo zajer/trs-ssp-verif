@@ -37,13 +37,15 @@ let _link_graph_edge_2_edges_and_node config edge ~max_node_id =
             (fun from_idx _ res_edgs -> (_big_link_2_edge ~from_idx ~to_idx:(max_node_id+1) "")::res_edgs) 
             edge.Bigraph.Link.p
             []
-            else (* 1-1 connection *)
-                let nodes_to_connect = 
-                    Bigraph.Link.Ports.fold 
-                    (fun from_idx _ res -> from_idx::res )
-                    edge.Bigraph.Link.p
-                    [] in
-                [_big_link_2_edge ~from_idx:(List.nth nodes_to_connect 0) ~to_idx:(List.nth nodes_to_connect 1) ""]
+        else if num_of_connections = 2 then (* 1-1 connection *)
+            let nodes_to_connect = 
+                Bigraph.Link.Ports.fold 
+                (fun from_idx _ res -> from_idx::res )
+                edge.Bigraph.Link.p
+                [] in
+            [_big_link_2_edge ~from_idx:(List.nth nodes_to_connect 0) ~to_idx:(List.nth nodes_to_connect 1) ""]
+        else (* idle connection *)
+            []
     in
     if num_of_connections > 2 then
         res_edgs,Some (_hyper_edge_2_node config (max_node_id+1))
