@@ -10,6 +10,7 @@
 *.opam
 # ocamlbuild working directory
 _build/
+exmp_*
 
 # ocamlbuild targets
 *.byte
