@@ -28,6 +28,25 @@ let extract_time_info ~ui2state_before_transition ~ui2state_after_transition ~ui
 type constructed_state = {state:Tracking_bigraph.TTS.state;ui_map:Ui.map;sat_config:Ssp.Template_state.t;time:int}
 let state2semi_state s = {Phase4.state=s.state;ui_map=s.ui_map}
 let semi_state2state s sat time = {state=s.Phase4.state;ui_map=s.ui_map;sat_config=sat;time}
+let _time_of_involved_agents agents sat = 
+    Array.fold_left 
+    (
+        fun top (aid,atm) -> 
+            if Common.IntSet.mem aid agents then
+                match top with
+                | None -> Some atm
+                | Some t -> 
+                    if t = atm then top
+                    else raise (Invalid_argument "Agents involved in one reaction are in different moments")
+            else
+                top
+    )
+    None
+    sat
+    |> fun top ->
+    match top with
+    | None -> raise (Invalid_argument "Transition function must involve at least one agent")
+    | Some t -> t
 let rec _construct_state 
     ~state_at_previous_moment
     ~state_currently_constructed
@@ -99,7 +118,7 @@ let rec _construct_state
                                     ~ui2state_before_transition:state_currently_constructed.ui_map
                                     ~ui2state_after_transition:new_constructed_semi_state.ui_map
                                     ~ui2redex:h.ui2redex 
-                                    ~start_time:(time_moment-1)
+                                    ~start_time:(_time_of_involved_agents involved_agents state_currently_constructed.sat_config)
                                     ~duration_of_transition:time_needed
                                     ~transition_idx:h.trans_fun.transition_idx
                                     trans_to_be_applied.react_label in
