@@ -1,6 +1,6 @@
 {
-    "directory":"exmp_ex2_content",
-    "special_name":"exmp_ex2",
+    "directory":"exmp_2_content",
+    "scenario_description":"A very basic example with two identical agents moving between areas.",
     "controls_2_shape":[["hyperedge","star"]],
     "controls_2_color":[]
 } 

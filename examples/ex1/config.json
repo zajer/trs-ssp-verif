@@ -1,6 +1,6 @@
 {
-    "directory":"exmp_ex1_content",
-    "special_name":"exmp_ex1",
+    "directory":"exmp_1_content",
+    "scenario_description":"Scenario with idling performed by one agent until the second agent finishes its actions.",
     "controls_2_shape":[["hyperedge","star"]],
     "controls_2_color":[]
 } 

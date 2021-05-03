@@ -84,7 +84,7 @@ let bigraph_2_network config bigraph =
     {nodes=nodes@nodes2;edges}
 let _network_to_json = [%yojson_of: network_data]
 type state_serialized_raw = {sat_config:Ssp.Template_state.t;network:network_data;ui_map:Ui.map}
-type state_serialized = {sat_config:(int*int)array;network_data:string[@key "network_data_file"];ui_map:string}
+type state_serialized = {sat_config:(int*int)array;network_data:string[@key "network_data_file"];ui_map:(int*int)array}
 [@@deriving yojson, show]
 let network_filename config time_moment =
      if config.directory <> "" then
@@ -98,9 +98,13 @@ let state_serialized_filename config time_moment =
         config.file_prefix^"-state-T"^(string_of_int time_moment)^".json"
 let state_serialized_filename_regex config =
     config.file_prefix^"-state-T[0-9]+.json"
+let _ui_map_to_array_of_pairs map =
+    let res_seq = Ui.UIMappingsSet.to_seq map in
+    let res_array = Array.of_seq res_seq in
+    res_array
 let _raw_2_exported (ssr:state_serialized_raw) (config:state_serialization_config) time_moment =
     let network_filename = network_filename config time_moment in
-        {sat_config = ssr.sat_config;network_data=network_filename;ui_map=Ui.map_to_string ssr.ui_map}
+        {sat_config = ssr.sat_config;network_data=network_filename;ui_map=_ui_map_to_array_of_pairs ssr.ui_map}
 let _make_ssr sat net uim =
     {network=net;sat_config=sat;ui_map=uim}
 let transformer_save_state config (part_res_cs,_) current_result = 

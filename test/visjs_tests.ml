@@ -73,10 +73,11 @@ let test_constructed_state_2_network_3 _ =
         expected_result
         result
 let test_save_state_as_network ctx =
-    let tmp_dir_name = bracket_tmpdir ctx in
+    let tmp_dir_name = bracket_tmpdir ctx
+    and ui_map_raw = [|(0,7);(1,5);(2,12)|] in
     let bigraph = "{(0, X:1),(1, Y:1),(2, Z:1),(3, W:1)}\n0 4 0\n0100\n0010\n0000\n0000\n({}, {}, {(0, 1), (1, 1), (2, 1)})\n({}, {}, {(2, 1), (3, 1)})" |> Bigraph.Big.of_string 
     and sat_config = [|(1,2);(2,3)|]
-    and ui_map = Ui.make_map_of_list [(0,7);(1,5);(2,12)]
+    and ui_map = Ui.make_map_of_list (Array.to_list ui_map_raw)
     and config = {Visjs.directory=tmp_dir_name; file_prefix="test_state"; control2shape=Hashtbl.create 0; control2color= Hashtbl.create 0} 
     and time_moment = 777 in 
     let network = Visjs.bigraph_2_network config bigraph 
@@ -93,7 +94,7 @@ let test_save_state_as_network ctx =
     assert_equal
         ~msg:"Saved state not equal to expected"
         ~printer:[%show: Visjs.state_serialized]
-        {Visjs.sat_config;network_data=(Visjs.network_filename config time_moment);ui_map=Ui.map_to_string ui_map}
+        {Visjs.sat_config;network_data=(Visjs.network_filename config time_moment);ui_map=ui_map_raw}
         saved_state;
     assert_equal
         ~msg:"Saved network not equal to expected"
