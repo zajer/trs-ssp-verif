@@ -88,16 +88,16 @@ type state_serialized = {sat_config:(int*int)array;network_data:string[@key "net
 [@@deriving yojson, show]
 let network_filename config time_moment =
      if config.directory <> "" then
-        config.directory^"//"^config.file_prefix^"-network-T:"^(string_of_int time_moment)^".json"
+        config.directory^"//"^config.file_prefix^"-network-T"^(string_of_int time_moment)^".json"
     else
-        config.file_prefix^"-network-T:"^(string_of_int time_moment)^".json"
+        config.file_prefix^"-network-T"^(string_of_int time_moment)^".json"
 let state_serialized_filename config time_moment =
     if config.directory <> "" then
-        config.directory^"//"^config.file_prefix^"-state-T:"^(string_of_int time_moment)^".json"
+        config.directory^"//"^config.file_prefix^"-state-T"^(string_of_int time_moment)^".json"
     else
-        config.file_prefix^"-state-T:"^(string_of_int time_moment)^".json"
+        config.file_prefix^"-state-T"^(string_of_int time_moment)^".json"
 let state_serialized_filename_regex config =
-    config.file_prefix^"-state-T:[0-9]+.json"
+    config.file_prefix^"-state-T[0-9]+.json"
 let _raw_2_exported (ssr:state_serialized_raw) (config:state_serialization_config) time_moment =
     let network_filename = network_filename config time_moment in
         {sat_config = ssr.sat_config;network_data=network_filename;ui_map=Ui.map_to_string ssr.ui_map}
