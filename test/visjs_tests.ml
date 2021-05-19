@@ -83,7 +83,7 @@ let test_save_state_as_network ctx =
     let network = Visjs.bigraph_2_network config bigraph 
     and input_result = {Phase1.is_successful=true;value=[],[];error_message=None} 
     and input_state = {Phase3.state={Tracking_bigraph.TTS.bigraph;index=777};ui_map;sat_config;time=time_moment} in
-    let result = Visjs.transformer_save_state config (input_state,[]) input_result 
+    let result = Visjs.transformer_save_state config (Some (input_state,[])) input_result 
     and expected_result = input_result in
     let saved_state = Yojson.Safe.from_file (Visjs.state_serialized_filename config time_moment) |> [%of_yojson: Visjs.state_serialized] 
     and saved_network = Yojson.Safe.from_file (Visjs.network_filename config time_moment) |> [%of_yojson: Visjs.network_data]  in
@@ -113,7 +113,7 @@ let test_save_timeline_1 ctx =
     let input_result = {Phase1.is_successful=true;value=[],[];error_message=None} 
     and input_state = {Phase3.state={Tracking_bigraph.TTS.bigraph=Bigraph.Big.zero;index=777};ui_map=Ui.empty_map;sat_config=[||];time=789} 
     and input_time_infos = [time_info_1;time_info_2] in
-    let result = Visjs.transformer_save_timeline config (input_state,input_time_infos) input_result 
+    let result = Visjs.transformer_save_timeline config (Some (input_state,input_time_infos)) input_result 
     and expected_result = input_result
     and expected_timeline = Visjs.time_infos_2_timeline [time_info_1;time_info_2]
     and expected_groups = Visjs.set_of_participants_2_groups (Common.IntSet.of_list [1;2;3;4]) in
@@ -149,7 +149,7 @@ let test_save_timeline_2 ctx =
     and current_timeline = [time_info_old] |> Visjs.time_infos_2_timeline
     and input_time_infos = [time_info_new] in
     let config = {Visjs.directory=tmp_dir_name;name="test_timeline";known_objects=Common.IntSet.of_list [1;2;3;4];current_timeline;} in
-    let result = Visjs.transformer_save_timeline config (input_state,input_time_infos) input_result 
+    let result = Visjs.transformer_save_timeline config (Some (input_state,input_time_infos)) input_result 
     and expected_result = input_result
     and expected_timeline = Visjs.time_infos_2_timeline [time_info_new;time_info_old] in
     let result_timeline = Yojson.Safe.from_file (Visjs.timeline_filename config) |> [%of_yojson: Visjs.timeline] in

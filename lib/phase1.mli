@@ -3,7 +3,7 @@ type output = {name:string;mutable is_scenario_valid:bool;mutable message:string
 val output_filename : string -> string
 val output_files_regex : unit -> string
 module ResultTransformer : sig
-    type t = Phase3.constructed_state * Phase3.time_info list
+    type t = (Phase3.constructed_state * Phase3.time_info list) option
     type o = t -> result -> result
     
     val stack : o -> o -> o

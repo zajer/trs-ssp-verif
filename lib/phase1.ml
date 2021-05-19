@@ -15,7 +15,7 @@ let output_filename name =
 let output_files_regex _ = 
     ".+_trs-ssp-output.json"
 module ResultTransformer = struct
-    type t = Phase3.constructed_state * (Phase3.time_info list)
+    type t = ( Phase3.constructed_state * (Phase3.time_info list) ) option
     type o = t -> result -> result
 
     let stack (o1 : o) (o2:o) : o =
@@ -34,16 +34,22 @@ module BasicTransformers = struct
             )
             patterns in
         result
-    let disqualify_results_if_pattern_detected patterns ((part_res_cs,_) : ResultTransformer.t ) current_result =
-        match _does_pattern_in_constructed_state_occur part_res_cs patterns with
+    let disqualify_results_if_pattern_detected patterns (new_result_element : ResultTransformer.t ) current_result =
+        match new_result_element with
         | None -> current_result
-        | Some p -> {is_successful=false; value=current_result.value;error_message=Some ("Forbidden pattern detected:"^p.description)}
+        | Some (part_res_cs,_) ->
+            match _does_pattern_in_constructed_state_occur part_res_cs patterns with
+            | None -> current_result
+            | Some p -> {is_successful=false; value=current_result.value;error_message=Some ("Forbidden pattern detected:"^p.description)}
     let _does_any_action_end_after_moment time_infos moment =
         List.exists (fun ti -> ti.Phase3.end_time > moment ) time_infos
-    let disqualify_results_if_scenario_takes_too_long max_time (_,time_infos) current_result =
-        match _does_any_action_end_after_moment time_infos max_time with
-        | false -> current_result
-        | true -> {is_successful=false; value=current_result.value;error_message=Some ("At least one of the actions in the scenario ends after moment:"^(string_of_int max_time))}
+    let disqualify_results_if_scenario_takes_too_long max_time new_result_element current_result =
+        match new_result_element with 
+        | None -> current_result
+        | Some ((_,time_infos)) ->
+            match _does_any_action_end_after_moment time_infos max_time with
+            | false -> current_result
+            | true -> {is_successful=false; value=current_result.value;error_message=Some ("At least one of the actions in the scenario ends after moment:"^(string_of_int max_time))}
     let save_or_update_output current_output name _ current_result =
         current_output.is_scenario_valid <- current_result.is_successful;
         if not current_output.is_scenario_valid then
@@ -85,9 +91,11 @@ let rec _proceed_with_construction_of_result current_result params operation =
                         params.all_trans_by_key in
                 let new_current_result = _append_partial_result current_result new_state new_time_infos 
                 and new_params = _update_params params new_state rest_of_ewalk  in
-                    _proceed_with_construction_of_result (ResultTransformer.apply (new_state,new_time_infos) new_current_result operation) new_params operation  
+                    _proceed_with_construction_of_result (ResultTransformer.apply (Some (new_state,new_time_infos)) new_current_result operation) new_params operation  
             with
-            | Phase4.Not_updateable s -> {is_successful=false;value=current_result.value;error_message=Some (s^" while constructing a state at the moment:"^(string_of_int (params.current_time+1)))}
+            | Phase4.Not_updateable s -> 
+                let res = {is_successful=false;value=current_result.value;error_message=Some (s^" while constructing a state at the moment:"^(string_of_int (params.current_time+1)))} in
+                ResultTransformer.apply None res operation
 let _initial_result init_state = {is_successful=true; value=([init_state],[]); error_message=None}
 let _initial_ui_map_on_nodes ~num_of_nodes =
     List.init num_of_nodes (fun i -> i+1,i ) |> Ui.make_map_of_list
@@ -116,7 +124,7 @@ let _construct_result ~initial_state ~num_of_agents ~whole_ewalk all_states_by_i
             all_trans_by_idx;
             all_trans_by_key
         } in
-    let initial_result_transformed = (ResultTransformer.apply (initial_state,[]) initial_result operation) in 
+    let initial_result_transformed = (ResultTransformer.apply (Some (initial_state,[])) initial_result operation) in 
     _proceed_with_construction_of_result initial_result_transformed initial_params operation
 let _invert_order_of_constructed_states res =
     match res.value with

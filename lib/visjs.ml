@@ -107,16 +107,19 @@ let _raw_2_exported (ssr:state_serialized_raw) (config:state_serialization_confi
         {sat_config = ssr.sat_config;network_data=network_filename;ui_map=_ui_map_to_array_of_pairs ssr.ui_map}
 let _make_ssr sat net uim =
     {network=net;sat_config=sat;ui_map=uim}
-let transformer_save_state config (part_res_cs,_) current_result = 
-    let filename = state_serialized_filename config part_res_cs.Phase3.time 
-    and network_filename = network_filename config part_res_cs.Phase3.time 
-    and network = bigraph_2_network config part_res_cs.state.bigraph in
-    let content_raw = _make_ssr part_res_cs.sat_config network part_res_cs.ui_map in
-    let network_json = [%yojson_of: network_data] network 
-    and content_json = (_raw_2_exported content_raw config part_res_cs.time) |> [%yojson_of: state_serialized]  in
-    Yojson.Safe.to_file filename content_json;
-    Yojson.Safe.to_file network_filename network_json ;
-    current_result
+let transformer_save_state config new_result_element current_result = 
+    match new_result_element with 
+    | None -> current_result
+    | Some (part_res_cs,_) ->
+        let filename = state_serialized_filename config part_res_cs.Phase3.time 
+        and network_filename = network_filename config part_res_cs.Phase3.time 
+        and network = bigraph_2_network config part_res_cs.state.bigraph in
+        let content_raw = _make_ssr part_res_cs.sat_config network part_res_cs.ui_map in
+        let network_json = [%yojson_of: network_data] network 
+        and content_json = (_raw_2_exported content_raw config part_res_cs.time) |> [%yojson_of: state_serialized]  in
+        Yojson.Safe.to_file filename content_json;
+        Yojson.Safe.to_file network_filename network_json ;
+        current_result
 type _style = {color:string; background_color:string;}
 let _style_2_string style = "color:"^style.color^"; background-color:"^style.background_color^";"
 type _timeline_item_raw = { start_time: int; end_time: int; object_name: string; style:_style; object_id:int}
@@ -163,20 +166,23 @@ let _time_info_2_raw_timeline_items (ti:Phase3.time_info) =
     ti.Phase3.participants
 let time_infos_2_timeline tis = 
     List.map (fun ti -> _time_info_2_raw_timeline_items ti ) tis |> List.flatten |> List.map (fun tir -> _conv_raw_timeline tir)
-let transformer_save_timeline config (_,time_infos) current_result =
-    let new_timeline_items = time_infos_2_timeline time_infos
-    and currently_participating_objects = 
-        List.fold_left 
-        (fun res ti -> Common.IntSet.union res (_time_info_2_participating_objects_set ti) ) 
-        Common.IntSet.empty 
-        time_infos in
-    let full_timeline = List.append new_timeline_items config.current_timeline 
-    and are_groups_extended = not (Common.IntSet.subset currently_participating_objects config.known_objects) in
-    (if are_groups_extended then 
-        let groups = set_of_participants_2_groups (Common.IntSet.union config.known_objects currently_participating_objects) in
-        config.known_objects <- (Common.IntSet.union currently_participating_objects config.known_objects);
-        _save_groups config groups
-    );
-    config.current_timeline <- full_timeline;
-    _save_timeline config full_timeline;
-    current_result
+let transformer_save_timeline config new_result_element current_result =
+    match new_result_element with
+    | None -> current_result
+    | Some (_,time_infos) -> 
+        let new_timeline_items = time_infos_2_timeline time_infos
+        and currently_participating_objects = 
+            List.fold_left 
+            (fun res ti -> Common.IntSet.union res (_time_info_2_participating_objects_set ti) ) 
+            Common.IntSet.empty 
+            time_infos in
+        let full_timeline = List.append new_timeline_items config.current_timeline 
+        and are_groups_extended = not (Common.IntSet.subset currently_participating_objects config.known_objects) in
+        (if are_groups_extended then 
+            let groups = set_of_participants_2_groups (Common.IntSet.union config.known_objects currently_participating_objects) in
+            config.known_objects <- (Common.IntSet.union currently_participating_objects config.known_objects);
+            _save_groups config groups
+        );
+        config.current_timeline <- full_timeline;
+        _save_timeline config full_timeline;
+        current_result
