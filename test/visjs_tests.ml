@@ -3,7 +3,7 @@ open Ssp_verification
 
 let test_constructed_state_2_network_1 _ =
     let bigraph = "{(0, X:0),(1, Y:0),(2, Z:0)}\n0 3 0\n000\n000\n000" |> Bigraph.Big.of_string
-    and config = {Visjs.directory="";file_prefix="test_state"; control2shape=Hashtbl.create 0; control2color= Hashtbl.create 0} in
+    and config = {Visjs.directory="";file_prefix="test_state"; control2color= Hashtbl.create 0} in
     let result = Visjs.bigraph_2_network config bigraph
     and expected_result = 
         {
@@ -22,7 +22,7 @@ let test_constructed_state_2_network_1 _ =
         result
 let test_constructed_state_2_network_2 _ =
     let bigraph = "{(0, X:0),(1, Y:0),(2, Z:0)}\n0 3 0\n010\n001\n000" |> Bigraph.Big.of_string
-    and config = {Visjs.directory="";file_prefix="test_state"; control2shape=Hashtbl.create 0; control2color= Hashtbl.create 0} in
+    and config = {Visjs.directory="";file_prefix="test_state"; control2color= Hashtbl.create 0} in
     let result = Visjs.bigraph_2_network config bigraph
     and expected_result = 
         {
@@ -34,8 +34,8 @@ let test_constructed_state_2_network_2 _ =
                 ];
             edges=
                 [
-                    {Visjs.from=1; to_=2;arrows="to"};
-                    {Visjs.from=0; to_=1;arrows="to"}
+                    {Visjs.from=1; to_=2;arrows="to";color=""};
+                    {Visjs.from=0; to_=1;arrows="to";color=""}
                 ]
         } in
     assert_equal
@@ -45,7 +45,7 @@ let test_constructed_state_2_network_2 _ =
         result
 let test_constructed_state_2_network_3 _ =
     let bigraph = "{(0, X:1),(1, Y:1),(2, Z:1),(3, W:1)}\n0 4 0\n0100\n0010\n0000\n0000\n({}, {}, {(0, 1), (1, 1), (2, 1)})\n({}, {}, {(2, 1), (3, 1)})" |> Bigraph.Big.of_string
-    and config = {Visjs.directory="";file_prefix="test_state"; control2shape=Hashtbl.create 0; control2color= Hashtbl.create 0} in
+    and config = {Visjs.directory="";file_prefix="test_state"; control2color= Hashtbl.create 0} in
     let result = Visjs.bigraph_2_network config bigraph
     and expected_result = 
         {
@@ -55,16 +55,16 @@ let test_constructed_state_2_network_3 _ =
                     {Visjs.id=2;label="2:Z";color="";shape=""};
                     {Visjs.id=1;label="1:Y";color="";shape=""};
                     {Visjs.id=0;label="0:X";color="";shape=""};
-                    {Visjs.id=4;label="";color="";shape=""};
+                    {Visjs.id=4;label="";color="#7BE141";shape="dot"};
                 ];
             edges=
                 [
-                    {Visjs.from=1; to_=2;arrows="to"};
-                    {Visjs.from=0; to_=1;arrows="to"};
-                    {Visjs.from=3; to_=2;arrows=""};
-                    {Visjs.from=2; to_=4;arrows=""};
-                    {Visjs.from=1; to_=4;arrows=""};
-                    {Visjs.from=0; to_=4;arrows=""}
+                    {Visjs.from=1; to_=2;arrows="to";color=""};
+                    {Visjs.from=0; to_=1;arrows="to";color=""};
+                    {Visjs.from=3; to_=2;arrows="";color="#7BE141"};
+                    {Visjs.from=2; to_=4;arrows="";color="#7BE141"};
+                    {Visjs.from=1; to_=4;arrows="";color="#7BE141"};
+                    {Visjs.from=0; to_=4;arrows="";color="#7BE141"}
                 ]
         } in
     assert_equal
@@ -78,7 +78,7 @@ let test_save_state_as_network ctx =
     let bigraph = "{(0, X:1),(1, Y:1),(2, Z:1),(3, W:1)}\n0 4 0\n0100\n0010\n0000\n0000\n({}, {}, {(0, 1), (1, 1), (2, 1)})\n({}, {}, {(2, 1), (3, 1)})" |> Bigraph.Big.of_string 
     and sat_config = [|(1,2);(2,3)|]
     and ui_map = Ui.make_map_of_list (Array.to_list ui_map_raw)
-    and config = {Visjs.directory=tmp_dir_name; file_prefix="test_state"; control2shape=Hashtbl.create 0; control2color= Hashtbl.create 0} 
+    and config = {Visjs.directory=tmp_dir_name; file_prefix="test_state"; control2color= Hashtbl.create 0} 
     and time_moment = 777 in 
     let network = Visjs.bigraph_2_network config bigraph 
     and input_result = {Phase1.is_successful=true;value=[],[];error_message=None} 

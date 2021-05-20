@@ -1,7 +1,7 @@
-type state_serialization_config = {directory:string;file_prefix:string; control2shape:(string,string)Hashtbl.t; control2color:(string,string) Hashtbl.t}
+type state_serialization_config = {directory:string;file_prefix:string; control2color:(string,string) Hashtbl.t}
 type node = {id:int;label:string;shape:string [@default ""] [@yojson_drop_default (=)];color:string [@default ""] [@yojson_drop_default (=)]}
 [@@deriving yojson, show]
-type edge = { from: int; to_:int[@key "to"]; arrows: string }
+type edge = { from: int; to_:int[@key "to"]; arrows: string;color:string [@default ""] [@yojson_drop_default (=)] }
 [@@deriving yojson, show]
 type network_data = { nodes : node list; edges:edge list}
 [@@deriving yojson, show]
@@ -9,32 +9,32 @@ let _default_string_fun = fun str_opt -> match str_opt with | None -> "" | Some 
 let _big_node_2_node config index (ctrl:Bigraph.Ctrl.t) =
     let ctrl_str = Bigraph.Ctrl.name ctrl in
     let color = Hashtbl.find_opt config.control2color ctrl_str |> _default_string_fun
-    and shape = Hashtbl.find_opt config.control2shape ctrl_str |> _default_string_fun in
+    and shape = "" in
     {id=index;label=(string_of_int index)^":"^ctrl_str;color;shape}
 let _state_2_nodes config bigraph = 
     Bigraph.Nodes.fold (fun idx ctrl res -> let part_res = _big_node_2_node config idx ctrl in part_res::res ) (bigraph.Bigraph.Big.n) []
-let _big_link_2_edge ~from_idx ~to_idx arrows =
-    { from=from_idx; to_=to_idx; arrows }
+let _big_link_2_edge ~from_idx ~to_idx arrows color =
+    { from=from_idx; to_=to_idx; arrows; color }
 let _place_graph_2_edges bigraph = 
-    Bigraph.Sparse.fold (fun from_idx to_idx res -> _big_link_2_edge ~from_idx ~to_idx "to" :: res) bigraph.Bigraph.Big.p.nn []
+    Bigraph.Sparse.fold (fun from_idx to_idx res -> _big_link_2_edge ~from_idx ~to_idx "to" "" :: res) bigraph.Bigraph.Big.p.nn []
 let _link_graph_edge_2_edge edge =
     Bigraph.Link.Ports.fold 
         (
-            fun from_idx to_idx res -> _big_link_2_edge ~from_idx ~to_idx "" :: res 
+            fun from_idx to_idx res -> _big_link_2_edge ~from_idx ~to_idx "" "#7BE141" :: res 
         ) 
         edge.Bigraph.Link.p 
         []
 let hyperedge_node_tag = "hyperedge"
-let _hyper_edge_2_node config node_id =
-    let color = Hashtbl.find_opt config.control2color hyperedge_node_tag |> _default_string_fun
-    and shape = Hashtbl.find_opt config.control2shape hyperedge_node_tag |> _default_string_fun in
+let _hyper_edge_2_node _ node_id =
+    let color = "#7BE141"
+    and shape = "dot" in
     {id=node_id;label="";color;shape}
 let _link_graph_edge_2_edges_and_node config edge ~max_node_id =
     let num_of_connections = Bigraph.Link.Ports.cardinal edge.Bigraph.Link.p in
     let res_edgs =
         if num_of_connections > 2 then (* many-many *)
             Bigraph.Link.Ports.fold 
-            (fun from_idx _ res_edgs -> (_big_link_2_edge ~from_idx ~to_idx:(max_node_id+1) "")::res_edgs) 
+            (fun from_idx _ res_edgs -> (_big_link_2_edge ~from_idx ~to_idx:(max_node_id+1) "" "#7BE141")::res_edgs) 
             edge.Bigraph.Link.p
             []
         else if num_of_connections = 2 then (* 1-1 connection *)
@@ -43,7 +43,7 @@ let _link_graph_edge_2_edges_and_node config edge ~max_node_id =
                 (fun from_idx _ res -> from_idx::res )
                 edge.Bigraph.Link.p
                 [] in
-            [_big_link_2_edge ~from_idx:(List.nth nodes_to_connect 0) ~to_idx:(List.nth nodes_to_connect 1) ""]
+            [_big_link_2_edge ~from_idx:(List.nth nodes_to_connect 0) ~to_idx:(List.nth nodes_to_connect 1) "" "#7BE141"]
         else (* idle connection *)
             []
     in
