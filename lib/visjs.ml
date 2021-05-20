@@ -140,7 +140,7 @@ let _save_timeline config tl =
     let tl_json = [%yojson_of: timeline] tl in
     Yojson.Safe.to_file (timeline_filename config) tl_json
 let set_of_participants_2_groups sop = 
-    Common.IntSet.fold (fun participant_id res -> {id=participant_id;content=(string_of_int participant_id)}::res) sop []
+    Common.IntSet.fold (fun participant_id res -> {id=participant_id;content="OBJ "^(string_of_int participant_id)}::res) sop []
 let groups_filename (config:timeline_config) = 
     if config.directory <> "" then
         config.directory^"//"^config.name^"-groups.json"
